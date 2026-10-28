@@ -2,7 +2,7 @@
 <html lang="zh-Hant">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
   <title>Let’s Speak</title>
   <style>
     :root {
@@ -19,27 +19,31 @@
       margin: 0;
       padding: 0;
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      -webkit-tap-highlight-color: transparent;
     }
 
+    /* 支援 100dvh 防範手機瀏覽器網址列伸展影響 */
     body {
-      height: 100vh;
+      min-height: 100vh;
+      min-height: 100dvh;
       display: flex;
       justify-content: center;
       align-items: center;
       background: var(--bg-gradient);
-      padding: 2vh 24px;
-      overflow: hidden;
+      padding: env(safe-area-inset-top, 16px) env(safe-area-inset-right, 16px) env(safe-area-inset-bottom, 16px) env(safe-area-inset-left, 16px);
+      overflow-x: hidden;
     }
 
-    /* 主卡片容器：上下切齊高度 (92vh)，寬度自適應展開 */
+    /* 主卡片容器：電腦端上下貼齊（92dvh），手機端保證完整容納且不溢出 */
     .app-card {
       background: var(--card-bg);
       width: 100%;
       max-width: 960px;
       height: 92vh;
-      border-radius: 40px;
+      height: 92dvh;
+      border-radius: 36px;
       box-shadow: var(--card-shadow);
-      padding: 4vh 48px;
+      padding: clamp(20px, 3.5vh, 40px) clamp(16px, 4vw, 44px);
       display: flex;
       flex-direction: column;
       align-items: center;
@@ -47,32 +51,32 @@
       position: relative;
     }
 
-    /* 頂部手繪感弧線標題 ( Let’s Speak ) */
+    /* 頂部標題 */
     .header-box {
       text-align: center;
       flex-shrink: 0;
     }
 
     .main-title {
-      font-size: clamp(2.4rem, 4.5vh, 3.6rem);
+      font-size: clamp(1.8rem, 4vh, 3.2rem);
       font-weight: 800;
       color: #1e293b;
-      letter-spacing: 1px;
+      letter-spacing: 0.5px;
       display: inline-flex;
       align-items: center;
-      gap: 8px;
+      gap: 6px;
     }
 
     .bracket {
       color: #94a3b8;
       font-weight: 300;
-      font-size: clamp(2.6rem, 5vh, 4rem);
+      font-size: clamp(2rem, 4.5vh, 3.6rem);
     }
 
     .arch-curve {
       width: 85%;
-      height: 8px;
-      margin: 4px auto 0;
+      height: 6px;
+      margin: 2px auto 0;
       border-radius: 50%;
       border-top: 3px solid #cbd5e1;
     }
@@ -85,7 +89,7 @@
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      animation: fadeIn 0.3s ease-in-out;
+      animation: fadeIn 0.25s ease-in-out;
     }
 
     .view-section.active {
@@ -93,39 +97,41 @@
     }
 
     @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(10px); }
+      from { opacity: 0; transform: translateY(6px); }
       to { opacity: 1; transform: translateY(0); }
     }
 
-    /* ================= 扉頁（首頁）：放大書本與排版 ================= */
+    /* ================= 扉頁（首頁）：書本與按鈕 ================= */
     .books-row {
       display: flex;
       justify-content: center;
       align-items: center;
-      gap: clamp(20px, 3.5vw, 40px);
+      gap: clamp(10px, 2.5vw, 36px);
       width: 100%;
       margin: auto 0;
     }
 
     .book-item {
       position: relative;
-      /* 高度跟隨螢幕高度放大，保持 1:1.45 書本比例 */
-      height: clamp(240px, 48vh, 440px);
+      /* 依視窗高寬自動約束，手機窄螢幕下以寬度 28vw 為主，電腦下以高度為主，避免超出卡片 */
+      width: min(28vw, 190px);
       aspect-ratio: 1 / 1.45;
-      border-radius: 18px;
+      max-height: 48vh;
+      border-radius: clamp(10px, 2vw, 18px);
       overflow: hidden;
-      box-shadow: 0 16px 32px rgba(30, 41, 59, 0.18);
-      transition: transform 0.25s ease, box-shadow 0.25s ease;
+      box-shadow: 0 10px 24px rgba(30, 41, 59, 0.16);
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
       cursor: pointer;
       background: #f1f5f9;
       display: flex;
       align-items: center;
       justify-content: center;
+      flex-shrink: 0;
     }
 
     .book-item:hover {
-      transform: translateY(-8px) scale(1.03);
-      box-shadow: 0 22px 38px rgba(30, 41, 59, 0.24);
+      transform: translateY(-5px) scale(1.02);
+      box-shadow: 0 18px 32px rgba(30, 41, 59, 0.22);
     }
 
     .book-item img {
@@ -139,21 +145,20 @@
     .btn-capsule {
       background: var(--btn-bg);
       color: #334155;
-      font-size: clamp(1.2rem, 2.2vh, 1.5rem);
+      font-size: clamp(1.1rem, 2vh, 1.4rem);
       font-weight: 800;
-      letter-spacing: 2px;
+      letter-spacing: 1.5px;
       border: 2px solid #e2e8f0;
-      padding: clamp(14px, 2vh, 18px) clamp(60px, 7vw, 90px);
-      border-radius: 60px;
+      padding: clamp(12px, 1.8vh, 16px) clamp(44px, 6vw, 84px);
+      border-radius: 50px;
       cursor: pointer;
       box-shadow: var(--btn-shadow);
       transition: all 0.2s ease;
       flex-shrink: 0;
-      margin-top: 10px;
     }
 
     .btn-capsule:hover {
-      transform: translateY(-3px);
+      transform: translateY(-2px);
       box-shadow: var(--btn-hover-shadow);
       border-color: #cbd5e1;
       color: #0f172a;
@@ -169,7 +174,7 @@
       max-width: 760px;
       display: grid;
       grid-template-columns: repeat(3, 1fr);
-      gap: clamp(16px, 2.5vw, 28px);
+      gap: clamp(8px, 2vw, 24px);
       margin: auto 0;
     }
 
@@ -177,35 +182,37 @@
       display: flex;
       flex-direction: column;
       align-items: center;
-      gap: 16px;
+      gap: clamp(10px, 1.8vh, 18px);
     }
 
     .column-title {
-      font-size: clamp(1.1rem, 2vh, 1.3rem);
+      font-size: clamp(0.95rem, 1.8vh, 1.25rem);
       font-weight: 800;
       color: #64748b;
-      margin-bottom: 6px;
-      letter-spacing: 1px;
+      margin-bottom: 2px;
+      letter-spacing: 0.5px;
+      white-space: nowrap;
     }
 
     .unit-pill-btn {
       width: 100%;
       background: #ffffff;
-      border: 2px solid #e2e8f0;
-      border-radius: 24px;
-      padding: clamp(14px, 2vh, 20px) 10px;
-      font-size: clamp(1rem, 1.8vh, 1.25rem);
+      border: 1.8px solid #e2e8f0;
+      border-radius: 20px;
+      padding: clamp(10px, 1.6vh, 18px) 4px;
+      font-size: clamp(0.82rem, 1.6vh, 1.15rem);
       font-weight: 700;
       color: #334155;
       cursor: pointer;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+      box-shadow: 0 3px 8px rgba(0,0,0,0.04);
       transition: all 0.2s ease;
       text-align: center;
+      white-space: nowrap;
     }
 
     .unit-pill-btn:hover {
-      transform: translateY(-3px);
-      box-shadow: 0 8px 18px rgba(0,0,0,0.09);
+      transform: translateY(-2px);
+      box-shadow: 0 6px 14px rgba(0,0,0,0.08);
     }
 
     .unit-pill-btn.book1:hover { border-color: #ef4444; color: #ef4444; }
@@ -217,14 +224,13 @@
       background: transparent;
       border: none;
       color: #64748b;
-      font-size: clamp(1rem, 1.8vh, 1.15rem);
+      font-size: clamp(0.9rem, 1.6vh, 1.1rem);
       font-weight: 600;
       cursor: pointer;
-      margin-top: 12px;
+      margin-top: 8px;
       display: inline-flex;
       align-items: center;
       gap: 6px;
-      transition: color 0.2s;
       flex-shrink: 0;
     }
 
@@ -244,59 +250,70 @@
 
     .quiz-header-badge {
       display: inline-block;
-      padding: 8px 24px;
+      padding: 6px 18px;
       background: #f1f5f9;
       color: #334155;
       border-radius: 30px;
-      font-size: 1.1rem;
+      font-size: clamp(0.9rem, 1.6vh, 1.05rem);
       font-weight: 800;
-      margin-bottom: 24px;
+      margin-bottom: 18px;
     }
 
     .coming-soon-box {
-      padding: 40px 24px;
+      padding: clamp(24px, 4vh, 36px) 16px;
       background: #f8fafc;
       border: 2px dashed #cbd5e1;
-      border-radius: 28px;
+      border-radius: 24px;
       width: 100%;
-      max-width: 520px;
-      margin-bottom: 28px;
+      max-width: 460px;
+      margin-bottom: 20px;
     }
 
     .coming-soon-icon {
-      font-size: 3rem;
-      margin-bottom: 12px;
+      font-size: clamp(2.2rem, 4vh, 3rem);
+      margin-bottom: 8px;
     }
 
     .coming-soon-text {
       color: #334155;
-      font-size: 1.3rem;
+      font-size: clamp(1.1rem, 2vh, 1.25rem);
       font-weight: 800;
-      margin-bottom: 8px;
+      margin-bottom: 6px;
     }
 
     .coming-soon-sub {
       color: #94a3b8;
-      font-size: 1rem;
-      line-height: 1.5;
+      font-size: clamp(0.85rem, 1.4vh, 0.95rem);
+      line-height: 1.4;
     }
 
-    /* 行動裝置極端情況適配 */
-    @media (max-width: 640px) {
+    /* ================= 手機專屬響應微調 (Mobile Breakpoint) ================= */
+    @media (max-width: 480px) {
       body {
-        height: auto;
-        min-height: 100vh;
-        overflow-y: auto;
-        padding: 16px 12px;
+        padding: 10px;
       }
       .app-card {
-        height: auto;
-        min-height: 94vh;
-        padding: 28px 16px;
+        height: 94dvh;
         border-radius: 28px;
+        padding: 24px 14px 20px;
+      }
+      .books-row {
+        gap: 8px;
       }
       .book-item {
-        height: 220px;
+        width: 29vw;
+        border-radius: 12px;
+      }
+      .topics-columns-container {
+        gap: 6px;
+      }
+      .unit-pill-btn {
+        border-radius: 14px;
+        font-size: 0.8rem;
+        padding: 12px 2px;
+      }
+      .column-title {
+        font-size: 0.9rem;
       }
     }
   </style>
