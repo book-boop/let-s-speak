@@ -1,0 +1,523 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>( Let’s Speak ) 英語學習題庫</title>
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Font Awesome -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <!-- Google 圓潤字體 Quicksand & Noto Sans TC -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@500;700&family=Quicksand:wght@600;700;800&display=swap" rel="stylesheet">
+
+  <style>
+    body {
+      font-family: 'Quicksand', 'Noto Sans TC', sans-serif;
+      /* 參考圖的柔和粉彩色漸層底色 */
+      background: linear-gradient(135deg, #c3d9fe 0%, #e8e3f5 35%, #fce7f3 70%, #dbeafe 100%);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 1.5rem;
+      margin: 0;
+    }
+
+    /* 中央白色主卡片：精準還原參考圖的大圓角與柔和陰影 */
+    .main-board {
+      background: #ffffff;
+      border-radius: 28px;
+      box-shadow: 0 20px 45px rgba(85, 107, 148, 0.18), 0 4px 12px rgba(0, 0, 0, 0.04);
+      width: 100%;
+      max-width: 680px;
+      min-height: 520px;
+      padding: 2.2rem 2.5rem;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      position: relative;
+      transition: all 0.3s ease;
+    }
+
+    /* 書本封面微傾斜與陰影質感 (參照圖上微角度) */
+    .book-left {
+      transform: rotate(-3.5deg);
+      transition: transform 0.25s ease, box-shadow 0.25s ease;
+    }
+    .book-mid {
+      transform: rotate(0deg);
+      transition: transform 0.25s ease, box-shadow 0.25s ease;
+    }
+    .book-right {
+      transform: rotate(3.5deg);
+      transition: transform 0.25s ease, box-shadow 0.25s ease;
+    }
+    .book-left:hover, .book-mid:hover, .book-right:hover {
+      transform: translateY(-6px) scale(1.03);
+    }
+
+    /* 參考圖中經典的圓弧膠囊 START 按鈕 */
+    .pill-btn-start {
+      background: #ffffff;
+      color: #2b456b;
+      border: 1.5px solid #e2e8f0;
+      border-radius: 9999px;
+      font-weight: 800;
+      letter-spacing: 0.08em;
+      box-shadow: 0 4px 14px rgba(0, 0, 0, 0.06);
+      transition: all 0.2s ease;
+    }
+    .pill-btn-start:hover {
+      background: #f8fafc;
+      border-color: #cbd5e1;
+      transform: translateY(-2px);
+      box-shadow: 0 6px 18px rgba(0, 0, 0, 0.1);
+    }
+    .pill-btn-start:active {
+      transform: scale(0.97);
+    }
+
+    /* 9大單元選單按鈕 */
+    .topic-pill {
+      background: #f8fafc;
+      border: 1.5px solid #e2e8f0;
+      border-radius: 16px;
+      transition: all 0.2s ease;
+      font-weight: 700;
+      color: #334155;
+    }
+    .topic-pill:hover {
+      background: #eff6ff;
+      border-color: #93c5fd;
+      color: #1d4ed8;
+      transform: translateY(-2px);
+    }
+
+    .fade-anim {
+      animation: fadeIn 0.28s ease-out;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: scale(0.985); }
+      to { opacity: 1; transform: scale(1); }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- 主白色卡片容器 -->
+  <div class="main-board">
+
+    <!-- ==================== 頁面 1：扉頁 (還原參考圖) ==================== -->
+    <div id="screen-home" class="fade-anim flex flex-col justify-between h-full flex-grow">
+      
+      <!-- 標題區：( Let’s Speak ) -->
+      <div class="text-center pt-2">
+        <h1 class="text-2xl sm:text-3xl font-extrabold text-[#1e3a5f] tracking-wide inline-flex items-center gap-1.5 justify-center">
+          <span class="text-[#2b4d79] font-light text-3xl font-serif">(</span>
+          Let’s Speak
+          <span class="text-[#2b4d79] font-light text-3xl font-serif">)</span>
+        </h1>
+        <!-- 參考圖下方淡灰色彎曲弧線 -->
+        <div class="flex justify-center -mt-0.5">
+          <svg class="w-48 sm:w-60 text-slate-300 stroke-current" height="12" viewBox="0 0 200 12" fill="none">
+            <path d="M10 9 C 60 1, 140 1, 190 9" stroke-width="1.8" stroke-linecap="round"/>
+          </svg>
+        </div>
+      </div>
+
+      <!-- 3本書封面區域 (水平排列、圓角微傾斜) -->
+      <div class="grid grid-cols-3 gap-3 sm:gap-5 max-w-lg mx-auto my-6 px-2 w-full items-center">
+        
+        <!-- Book 1 -->
+        <div class="book-left relative cursor-pointer" onclick="goToMenu(1)">
+          <div class="aspect-[3/4] rounded-2xl overflow-hidden shadow-lg border-2 border-white bg-gradient-to-br from-blue-600 via-sky-500 to-indigo-700 flex flex-col items-center justify-between p-3 text-white text-center">
+            <!-- 替換圖片插槽：之後換成你的圖片路徑，如 <img src="book1.jpg" ...> -->
+            <span class="text-[11px] font-bold tracking-wider opacity-90">LEVEL 1</span>
+            <div>
+              <p class="font-extrabold text-lg sm:text-xl drop-shadow">Book 1</p>
+              <i class="fa-solid fa-graduation-cap text-2xl mt-1 opacity-90"></i>
+            </div>
+            <span class="text-[10px] bg-black/20 px-2 py-0.5 rounded-full font-bold">U1 - U15</span>
+          </div>
+        </div>
+
+        <!-- Book 2 -->
+        <div class="book-mid relative cursor-pointer" onclick="goToMenu(2)">
+          <div class="aspect-[3/4] rounded-2xl overflow-hidden shadow-lg border-2 border-white bg-gradient-to-br from-red-600 via-rose-500 to-red-700 flex flex-col items-center justify-between p-3 text-white text-center">
+            <!-- 替換圖片插槽 -->
+            <span class="text-[11px] font-bold tracking-wider opacity-90">LEVEL 2</span>
+            <div>
+              <p class="font-extrabold text-lg sm:text-xl drop-shadow">Book 2</p>
+              <i class="fa-solid fa-book-open text-2xl mt-1 opacity-90"></i>
+            </div>
+            <span class="text-[10px] bg-black/20 px-2 py-0.5 rounded-full font-bold">U1 - U15</span>
+          </div>
+        </div>
+
+        <!-- Book 3 -->
+        <div class="book-right relative cursor-pointer" onclick="goToMenu(3)">
+          <div class="aspect-[3/4] rounded-2xl overflow-hidden shadow-lg border-2 border-white bg-gradient-to-br from-amber-400 via-yellow-400 to-orange-500 flex flex-col items-center justify-between p-3 text-white text-center">
+            <!-- 替換圖片插槽 -->
+            <span class="text-[11px] font-bold tracking-wider opacity-90">LEVEL 3</span>
+            <div>
+              <p class="font-extrabold text-lg sm:text-xl drop-shadow">Book 3</p>
+              <i class="fa-solid fa-star text-2xl mt-1 opacity-90"></i>
+            </div>
+            <span class="text-[10px] bg-black/20 px-2 py-0.5 rounded-full font-bold">U1 - U15</span>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- 底部白底膠囊 START 按鈕 (完全符合參考圖) -->
+      <div class="text-center pb-2">
+        <button onclick="goToMenu()" class="pill-btn-start px-12 py-2.5 text-base sm:text-lg">
+          START
+        </button>
+      </div>
+
+    </div>
+
+
+    <!-- ==================== 頁面 2：選單頁 (9大主題 3x3 網格) ==================== -->
+    <div id="screen-menu" class="hidden fade-anim flex flex-col justify-between h-full flex-grow">
+      
+      <!-- 標題與簡潔返回 -->
+      <div>
+        <div class="flex items-center justify-between mb-2">
+          <button onclick="showScreen('screen-home')" class="text-xs text-slate-400 hover:text-slate-700 transition flex items-center gap-1 font-bold">
+            <i class="fa-solid fa-chevron-left"></i> 回扉頁
+          </button>
+          <span class="text-[11px] text-slate-400 font-bold uppercase tracking-wider">Topic Selection</span>
+        </div>
+
+        <div class="text-center">
+          <h2 class="text-xl sm:text-2xl font-extrabold text-[#1e3a5f] inline-flex items-center gap-1">
+            <span class="text-[#2b4d79] font-light text-2xl font-serif">(</span>
+            請選擇練習單元
+            <span class="text-[#2b4d79] font-light text-2xl font-serif">)</span>
+          </h2>
+          <div class="flex justify-center -mt-0.5 mb-5">
+            <svg class="w-40 text-slate-300 stroke-current" height="10" viewBox="0 0 160 10" fill="none">
+              <path d="M5 8 C 45 1, 115 1, 155 8" stroke-width="1.8" stroke-linecap="round"/>
+            </svg>
+          </div>
+        </div>
+      </div>
+
+      <!-- 3x3 網格 (三本書 各3個範圍 = 剛好9個主題) -->
+      <div class="grid grid-cols-3 gap-3 sm:gap-4 my-auto py-2">
+        
+        <!-- Book 1 欄位 -->
+        <div class="flex flex-col gap-2.5 text-center">
+          <span class="text-xs font-bold text-sky-700 py-1 bg-sky-50 rounded-lg">Book 1</span>
+          <button onclick="openQuiz(1, 'U1-U5')" class="topic-pill py-3 px-2 text-xs sm:text-sm shadow-sm">
+            U1 - U5
+          </button>
+          <button onclick="openQuiz(1, 'U6-U10')" class="topic-pill py-3 px-2 text-xs sm:text-sm shadow-sm">
+            U6 - U10
+          </button>
+          <button onclick="openQuiz(1, 'U11-U15')" class="topic-pill py-3 px-2 text-xs sm:text-sm shadow-sm">
+            U11 - U15
+          </button>
+        </div>
+
+        <!-- Book 2 欄位 -->
+        <div class="flex flex-col gap-2.5 text-center">
+          <span class="text-xs font-bold text-rose-700 py-1 bg-rose-50 rounded-lg">Book 2</span>
+          <button onclick="openQuiz(2, 'U1-U5')" class="topic-pill py-3 px-2 text-xs sm:text-sm shadow-sm">
+            U1 - U5
+          </button>
+          <button onclick="openQuiz(2, 'U6-U10')" class="topic-pill py-3 px-2 text-xs sm:text-sm shadow-sm">
+            U6 - U10
+          </button>
+          <button onclick="openQuiz(2, 'U11-U15')" class="topic-pill py-3 px-2 text-xs sm:text-sm shadow-sm">
+            U11 - U15
+          </button>
+        </div>
+
+        <!-- Book 3 欄位 -->
+        <div class="flex flex-col gap-2.5 text-center">
+          <span class="text-xs font-bold text-amber-700 py-1 bg-amber-50 rounded-lg">Book 3</span>
+          <button onclick="openQuiz(3, 'U1-U5')" class="topic-pill py-3 px-2 text-xs sm:text-sm shadow-sm">
+            U1 - U5
+          </button>
+          <button onclick="openQuiz(3, 'U6-U10')" class="topic-pill py-3 px-2 text-xs sm:text-sm shadow-sm">
+            U6 - U10
+          </button>
+          <button onclick="openQuiz(3, 'U11-U15')" class="topic-pill py-3 px-2 text-xs sm:text-sm shadow-sm">
+            U11 - U15
+          </button>
+        </div>
+
+      </div>
+
+      <!-- 底部提示 -->
+      <div class="text-center pt-3 text-[12px] text-slate-400">
+        點擊任一單元即可開始作答練習
+      </div>
+
+    </div>
+
+
+    <!-- ==================== 頁面 3：極簡練習畫面 (音檔+圖片+選項) ==================== -->
+    <div id="screen-quiz" class="hidden fade-anim flex flex-col justify-between h-full flex-grow">
+      
+      <!-- 頂部資訊與返回按鈕 -->
+      <div class="flex items-center justify-between border-b border-slate-100 pb-2 mb-3">
+        <button onclick="showScreen('screen-menu')" class="text-xs text-slate-400 hover:text-slate-700 font-bold transition flex items-center gap-1">
+          <i class="fa-solid fa-chevron-left"></i> 回選單
+        </button>
+        <span id="quiz-tag" class="text-xs font-extrabold text-[#1e3a5f] bg-slate-100 px-3 py-1 rounded-full">
+          Book 1 : U1 - U5
+        </span>
+      </div>
+
+      <div class="space-y-4 my-auto">
+        <!-- 音檔試聽鈕 (簡約圓形音效鈕) -->
+        <div class="flex items-center justify-center gap-2">
+          <button onclick="playQuizAudio()" class="w-12 h-12 rounded-full bg-slate-100 hover:bg-sky-50 text-sky-600 border border-slate-200 shadow-sm flex items-center justify-center transition active:scale-95" title="播放音檔">
+            <i class="fa-solid fa-volume-high text-lg" id="audio-icon"></i>
+          </button>
+          <span class="text-xs text-slate-400 font-bold">點擊聽音檔</span>
+        </div>
+
+        <!-- 圖片展示插槽 (簡約圓角灰框) -->
+        <div class="w-full h-36 sm:h-44 bg-slate-50 border border-slate-200 rounded-2xl overflow-hidden flex items-center justify-center">
+          <img id="quiz-img" src="https://placehold.co/500x260/f1f5f9/64748b?text=Image+Placeholder" alt="Quiz Illustration" class="w-full h-full object-contain">
+        </div>
+
+        <!-- 題目內文 -->
+        <p id="quiz-question" class="text-center font-bold text-slate-800 text-sm sm:text-base px-2">
+          Listen and select the correct answer:
+        </p>
+
+        <!-- 選項列表 (4個簡約按鈕) -->
+        <div id="quiz-options" class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+          <!-- 由 JS 動態產生選項 -->
+        </div>
+
+        <!-- 答題反饋提示 -->
+        <div id="quiz-feedback" class="hidden text-center text-xs font-bold py-1.5 rounded-lg"></div>
+      </div>
+
+      <!-- 下一題按鈕 -->
+      <div class="flex justify-end pt-2">
+        <button id="btn-next" onclick="nextQuizQuestion()" class="hidden px-5 py-1.5 bg-[#1e3a5f] hover:bg-[#2b4d79] text-white text-xs font-bold rounded-full transition">
+          下一題 <i class="fa-solid fa-arrow-right ml-1"></i>
+        </button>
+      </div>
+
+    </div>
+
+  </div>
+
+
+  <!-- ==================== JavaScript 資料與操作邏輯 ==================== -->
+  <script>
+    // 題庫資料預留結構 (後續只需在對應單元填寫題目、圖片路徑及音檔路徑即可)
+    const quizDatabase = {
+      '1': {
+        'U1-U5': [
+          {
+            audioUrl: '', // 例: 'audio/b1_u1_1.mp3'
+            speakText: 'Apple', // 若 audioUrl 為空，會自動發音此文字
+            imgUrl: 'https://placehold.co/500x260/e0f2fe/0369a1?text=Apple',
+            question: 'What word do you hear?',
+            options: ['Apple', 'Banana', 'Cat', 'Dog'],
+            answer: 0
+          },
+          {
+            audioUrl: '',
+            speakText: 'Good morning, how are you?',
+            imgUrl: 'https://placehold.co/500x260/fef3c7/b45309?text=Greeting',
+            question: 'Choose the best reply:',
+            options: ['Good night', 'I am fine, thank you', 'Yes, it is', 'Goodbye'],
+            answer: 1
+          }
+        ],
+        'U6-U10': [
+          {
+            audioUrl: '',
+            speakText: 'Where is the library?',
+            imgUrl: 'https://placehold.co/500x260/fee2e2/b91c1c?text=Library',
+            question: 'Choose the correct answer:',
+            options: ['It is next to the park', 'I like apples', 'At 5 o clock', 'No, thanks'],
+            answer: 0
+          }
+        ],
+        'U11-U15': [
+          {
+            audioUrl: '',
+            speakText: 'Elephant',
+            imgUrl: 'https://placehold.co/500x260/f3e8ff/7e22ce?text=Elephant',
+            question: 'Identify the animal:',
+            options: ['Lion', 'Zebra', 'Elephant', 'Monkey'],
+            answer: 2
+          }
+        ]
+      },
+      '2': {
+        'U1-U5': [{ audioUrl: '', speakText: 'She enjoys playing tennis on weekends.', imgUrl: 'https://placehold.co/500x260/f0fdf4/15803d?text=Tennis', question: 'What does she enjoy?', options: ['Cooking', 'Playing tennis', 'Reading', 'Running'], answer: 1 }],
+        'U6-U10': [{ audioUrl: '', speakText: 'Tomorrow it will rain.', imgUrl: 'https://placehold.co/500x260/f1f5f9/475569?text=Weather', question: 'What is the weather tomorrow?', options: ['Sunny', 'Rainy', 'Snowy', 'Windy'], answer: 1 }],
+        'U11-U15': [{ audioUrl: '', speakText: 'Convenience store', imgUrl: 'https://placehold.co/500x260/e0f2fe/0369a1?text=Store', question: 'Where can you buy drinks?', options: ['Convenience store', 'Zoo', 'Museum', 'Gym'], answer: 0 }]
+      },
+      '3': {
+        'U1-U5': [{ audioUrl: '', speakText: 'Protect the environment.', imgUrl: 'https://placehold.co/500x260/f0fdf4/15803d?text=Nature', question: 'The main idea is:', options: ['Save money', 'Protect nature', 'Drive cars', 'Travel'], answer: 1 }],
+        'U6-U10': [{ audioUrl: '', speakText: 'Technology is changing fast.', imgUrl: 'https://placehold.co/500x260/fef3c7/b45309?text=AI+Tech', question: 'Technology is:', options: ['Stopping', 'Changing fast', 'Useless', 'Difficult'], answer: 1 }],
+        'U11-U15': [{ audioUrl: '', speakText: 'Congratulations on your graduation!', imgUrl: 'https://placehold.co/500x260/e0e7ff/4338ca?text=Graduation', question: 'What is the occasion?', options: ['Birthday', 'Graduation', 'Wedding', 'New Year'], answer: 1 }]
+      }
+    };
+
+    let activeBook = 1;
+    let activeUnit = 'U1-U5';
+    let questionIndex = 0;
+    let activeQuestions = [];
+    let isAnswered = false;
+
+    // 畫面切換
+    function showScreen(screenId) {
+      ['screen-home', 'screen-menu', 'screen-quiz'].forEach(id => {
+        const el = document.getElementById(id);
+        if (id === screenId) {
+          el.classList.remove('hidden');
+          el.classList.add('fade-anim');
+        } else {
+          el.classList.add('hidden');
+        }
+      });
+    }
+
+    // 進入選單頁 (若從特定書本進入也可以記錄)
+    function goToMenu(bookId) {
+      if (bookId) activeBook = bookId;
+      showScreen('screen-menu');
+    }
+
+    // 進入指定單元測驗
+    function openQuiz(bookNum, unitKey) {
+      activeBook = bookNum;
+      activeUnit = unitKey;
+      questionIndex = 0;
+
+      if (quizDatabase[bookNum] && quizDatabase[bookNum][unitKey]) {
+        activeQuestions = quizDatabase[bookNum][unitKey];
+      } else {
+        // 預設示範題
+        activeQuestions = [{
+          audioUrl: '',
+          speakText: 'Demo question',
+          imgUrl: 'https://placehold.co/500x260/f1f5f9/64748b?text=Book+' + bookNum + '+' + unitKey,
+          question: `題目建置中 (${unitKey})`,
+          options: ['Option A', 'Option B', 'Option C', 'Option D'],
+          answer: 0
+        }];
+      }
+
+      document.getElementById('quiz-tag').textContent = `Book ${bookNum} : ${unitKey}`;
+      renderQuizItem();
+      showScreen('screen-quiz');
+    }
+
+    // 渲染題目與選項
+    function renderQuizItem() {
+      isAnswered = false;
+      const q = activeQuestions[questionIndex];
+      const feedback = document.getElementById('quiz-feedback');
+      const nextBtn = document.getElementById('btn-next');
+
+      feedback.classList.add('hidden');
+      nextBtn.classList.add('hidden');
+
+      document.getElementById('quiz-img').src = q.imgUrl;
+      document.getElementById('quiz-question').textContent = q.question;
+
+      const optsContainer = document.getElementById('quiz-options');
+      optsContainer.innerHTML = '';
+
+      q.options.forEach((opt, idx) => {
+        const btn = document.createElement('button');
+        btn.className = "py-2.5 px-3 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 text-xs sm:text-sm font-bold transition flex items-center justify-between";
+        btn.innerHTML = `<span>${String.fromCharCode(65 + idx)}. ${opt}</span>`;
+        btn.onclick = () => checkOption(idx, btn);
+        optsContainer.appendChild(btn);
+      });
+    }
+
+    // 檢查作答
+    function checkOption(chosenIdx, btnElem) {
+      if (isAnswered) return;
+      isAnswered = true;
+
+      const q = activeQuestions[questionIndex];
+      const feedback = document.getElementById('quiz-feedback');
+      const nextBtn = document.getElementById('btn-next');
+
+      if (chosenIdx === q.answer) {
+        btnElem.classList.remove('bg-white', 'border-slate-200');
+        btnElem.classList.add('bg-emerald-50', 'border-emerald-500', 'text-emerald-700');
+        feedback.className = "text-center text-xs font-bold py-1.5 rounded-lg bg-emerald-50 text-emerald-700 block";
+        feedback.textContent = "✔ 答對了！ Correct!";
+      } else {
+        btnElem.classList.remove('bg-white', 'border-slate-200');
+        btnElem.classList.add('bg-rose-50', 'border-rose-400', 'text-rose-700');
+        feedback.className = "text-center text-xs font-bold py-1.5 rounded-lg bg-rose-50 text-rose-700 block";
+        feedback.textContent = `✘ 答錯了，正確答案是 (${String.fromCharCode(65 + q.answer)})`;
+      }
+
+      nextBtn.classList.remove('hidden');
+      if (questionIndex + 1 >= activeQuestions.length) {
+        nextBtn.innerHTML = `完成單元 <i class="fa-solid fa-check ml-1"></i>`;
+      } else {
+        nextBtn.innerHTML = `下一題 <i class="fa-solid fa-arrow-right ml-1"></i>`;
+      }
+    }
+
+    // 下一題或回選單
+    function nextQuizQuestion() {
+      if (questionIndex + 1 < activeQuestions.length) {
+        questionIndex++;
+        renderQuizItem();
+      } else {
+        showScreen('screen-menu');
+      }
+    }
+
+    // 音檔播放 (支援真實 MP3 網址，若無則自動調用 Web Speech 發音)
+    function playQuizAudio() {
+      const q = activeQuestions[questionIndex];
+      const icon = document.getElementById('audio-icon');
+
+      if (q.audioUrl && q.audioUrl.trim() !== '') {
+        const audio = new Audio(q.audioUrl);
+        icon.className = "fa-solid fa-spinner fa-spin text-lg";
+        audio.play().then(() => {
+          icon.className = "fa-solid fa-volume-high text-lg";
+        }).catch(() => {
+          icon.className = "fa-solid fa-volume-high text-lg";
+          speakFallback(q.speakText || q.question);
+        });
+      } else {
+        speakFallback(q.speakText || q.question);
+      }
+    }
+
+    function speakFallback(text) {
+      if ('speechSynthesis' in window) {
+        window.speechSynthesis.cancel();
+        const utter = new SpeechSynthesisUtterance(text);
+        utter.lang = 'en-US';
+        utter.rate = 0.85;
+        const icon = document.getElementById('audio-icon');
+        icon.className = "fa-solid fa-wave-square text-lg text-sky-500 animate-pulse";
+        utter.onend = () => { icon.className = "fa-solid fa-volume-high text-lg"; };
+        utter.onerror = () => { icon.className = "fa-solid fa-volume-high text-lg"; };
+        window.speechSynthesis.speak(utter);
+      }
+    }
+  </script>
+</body>
+</html>
