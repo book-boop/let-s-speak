@@ -2,7 +2,7 @@
  * Let's Speak - Book 1: Unit 1 ~ Unit 5 題庫資料
  * ======================================================== */
 
-// 第一大題：單字聽力排序（30 個單字池）
+// 第一大題：單字聽力排序
 const book1_U1_U5_Data = [
   {
     unit: "Unit 1",
@@ -66,15 +66,15 @@ const book1_U1_U5_Data = [
   }
 ];
 
-// 第二大題：句子聽力最佳回應（10 題抽 5 題）
+// 第二大題：句子回應聽力選擇（已校正精確秒數）
 const book1_PartB_Data = {
-  audioFile: "audio/b1_u1_u5_test_b.mp3", // 請將上傳的完整長音檔放入 audio/ 資料夾並命名為此
+  audioFile: "audio/B1 U1-U5.mp3", // 請確認檔名與路徑
   questions: [
     {
       id: 1,
-      script: "How do you spell your name?",
+      script: "One. How do you spell your name?",
       start: 0.0,
-      end: 4.5,
+      end: 4.8,
       options: [
         { label: "A", text: "I’m Ruby." },
         { label: "B", text: "It’s J-E-N-N-Y." },
@@ -84,9 +84,9 @@ const book1_PartB_Data = {
     },
     {
       id: 2,
-      script: "Hey there, I’m Allen. What’s your name?",
-      start: 4.5,
-      end: 9.8,
+      script: "Two. Hey there, I’m Allen. What’s your name?",
+      start: 9.0,
+      end: 15.2,
       options: [
         { label: "A", text: "Hi, Allen. I’m Kelly!" },
         { label: "B", text: "Nice to meet you." },
@@ -96,9 +96,9 @@ const book1_PartB_Data = {
     },
     {
       id: 3,
-      script: "Eric, this is my mother.",
-      start: 9.8,
-      end: 14.5,
+      script: "Three. Eric, this is my mother.",
+      start: 19.5,
+      end: 24.5,
       options: [
         { label: "A", text: "It’s E-R-I-C." },
         { label: "B", text: "Hello, Mr. Smith." },
@@ -108,9 +108,9 @@ const book1_PartB_Data = {
     },
     {
       id: 4,
-      script: "How old is your brother?",
-      start: 14.5,
-      end: 19.5,
+      script: "Four. How old is your brother?",
+      start: 29.0,
+      end: 34.0,
       options: [
         { label: "A", text: "He’s fifteen years old." },
         { label: "B", text: "He has short hair." },
@@ -120,9 +120,9 @@ const book1_PartB_Data = {
     },
     {
       id: 5,
-      script: "Nice to meet you. Welcome to our school.",
-      start: 19.5,
-      end: 25.5,
+      script: "Five. Nice to meet you. Welcome to our school.",
+      start: 38.5,
+      end: 44.5,
       options: [
         { label: "A", text: "How are you?" },
         { label: "B", text: "See you." },
@@ -132,9 +132,9 @@ const book1_PartB_Data = {
     },
     {
       id: 6,
-      script: "What’s the weather like today?",
-      start: 25.5,
-      end: 30.2,
+      script: "Six. What’s the weather like today?",
+      start: 49.0,
+      end: 54.0,
       options: [
         { label: "A", text: "Let’s read books at home." },
         { label: "B", text: "It’s cool and cloudy." },
@@ -144,9 +144,9 @@ const book1_PartB_Data = {
     },
     {
       id: 7,
-      script: "Is your mother wearing a yellow T-shirt?",
-      start: 30.2,
-      end: 36.2,
+      script: "Seven. Is your mother wearing a yellow T-shirt?",
+      start: 58.5,
+      end: 64.5,
       options: [
         { label: "A", text: "Yes, she is." },
         { label: "B", text: "No, he isn’t." },
@@ -156,9 +156,9 @@ const book1_PartB_Data = {
     },
     {
       id: 8,
-      script: "What does your sister look like?",
-      start: 36.2,
-      end: 40.8,
+      script: "Eight. What does your sister look like?",
+      start: 69.0,
+      end: 74.0,
       options: [
         { label: "A", text: "She’s ten." },
         { label: "B", text: "He’s handsome." },
@@ -168,9 +168,9 @@ const book1_PartB_Data = {
     },
     {
       id: 9,
-      script: "How do you say “hi” in the afternoon?",
-      start: 40.8,
-      end: 46.5,
+      script: "Nine. How do you say “hi” in the afternoon?",
+      start: 78.5,
+      end: 84.5,
       options: [
         { label: "A", text: "It’s “Good morning.”" },
         { label: "B", text: "It’s “Good afternoon.”" },
@@ -180,9 +180,9 @@ const book1_PartB_Data = {
     },
     {
       id: 10,
-      script: "We can fly kites in the park today. What do you think?",
-      start: 46.5,
-      end: 52.8,
+      script: "Ten. We can fly kites in the park today. What do you think?",
+      start: 88.5,
+      end: 95.0,
       options: [
         { label: "A", text: "See you later." },
         { label: "B", text: "Nice to meet you, too." },

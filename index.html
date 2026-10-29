@@ -907,31 +907,42 @@
       playPartBCurrentAudio();
     }
 
-    // 依精確秒數播放長音檔片段
-    function playPartBCurrentAudio() {
-      const q = partBPickedQuestions[currentPartBQuestionIdx];
-      clearTimeout(audioStopTimer);
+    // 在 index.html 中替換原有的 playPartBCurrentAudio 函式
+function playPartBCurrentAudio() {
+  const q = partBPickedQuestions[currentPartBQuestionIdx];
+  if (!partBAudio) {
+    partBAudio = new Audio(book1_PartB_Data.audioFile);
+  }
 
-      if (partBAudio) {
-        partBAudio.currentTime = q.start;
-        partBAudio.play().then(() => {
-          const duration = (q.end - q.start) * 1000;
-          audioStopTimer = setTimeout(() => {
-            partBAudio.pause();
-          }, duration);
-        }).catch(() => {
-          // 音檔不存在時 fallback 語音朗讀題目
-          if ('speechSynthesis' in window) {
-            window.speechSynthesis.cancel();
-            const utterance = new SpeechSynthesisUtterance(q.script);
-            utterance.lang = 'en-US';
-            utterance.rate = 0.9;
-            window.speechSynthesis.speak(utterance);
-          }
-        });
-      }
+  // 清除先前的事件與計時器
+  partBAudio.pause();
+  if (partBAudio._timeUpdateHandler) {
+    partBAudio.removeEventListener('timeupdate', partBAudio._timeUpdateHandler);
+  }
+
+  // 設定起始播放時間點
+  partBAudio.currentTime = q.start;
+
+  // 使用 timeupdate 即時監控結束點，精準度高且不漂移
+  partBAudio._timeUpdateHandler = function() {
+    if (partBAudio.currentTime >= q.end) {
+      partBAudio.pause();
+      partBAudio.removeEventListener('timeupdate', partBAudio._timeUpdateHandler);
     }
+  };
+  partBAudio.addEventListener('timeupdate', partBAudio._timeUpdateHandler);
 
+  partBAudio.play().catch(() => {
+    // 找不到音檔時 fallback 語音朗讀
+    if ('speechSynthesis' in window) {
+      window.speechSynthesis.cancel();
+      const utterance = new SpeechSynthesisUtterance(q.script);
+      utterance.lang = 'en-US';
+      utterance.rate = 0.9;
+      window.speechSynthesis.speak(utterance);
+    }
+  });
+}
     // 選擇答案
     function selectPartBOption(selectedLabel, correctLabel, clickedBtn) {
       // 停止音檔
