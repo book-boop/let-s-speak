@@ -36,7 +36,6 @@
       overflow-x: hidden;
     }
 
-    /* 主卡片容器：上下貼齊 */
     .app-card {
       background: var(--card-bg);
       width: 100%;
@@ -53,7 +52,6 @@
       position: relative;
     }
 
-    /* 頂部標題 */
     .header-box {
       text-align: center;
       flex-shrink: 0;
@@ -83,7 +81,6 @@
       border-top: 3px solid #cbd5e1;
     }
 
-    /* 視圖切換 */
     .view-section {
       width: 100%;
       flex: 1;
@@ -104,7 +101,7 @@
       to { opacity: 1; transform: translateY(0); }
     }
 
-    /* ================= 扉頁（首頁） ================= */
+    /* ================= 首頁 ================= */
     .books-row {
       display: flex;
       justify-content: center;
@@ -165,7 +162,7 @@
       color: #0f172a;
     }
 
-    /* ================= 選單頁（9 大主題） ================= */
+    /* ================= 9 大主題選單 ================= */
     .topics-columns-container {
       width: 100%;
       max-width: 760px;
@@ -232,7 +229,7 @@
 
     .btn-back:hover { color: #0f172a; }
 
-    /* ================= 排序作答練習區 ================= */
+    /* ================= 第一大題：單字排序 ================= */
     .quiz-view-wrapper {
       width: 100%;
       max-width: 780px;
@@ -292,7 +289,6 @@
       transform: scale(1.03);
     }
 
-    /* 6 格圖片排序網格 */
     .cards-grid {
       display: grid;
       grid-template-columns: repeat(3, 1fr);
@@ -336,7 +332,6 @@
       background: #fef2f2;
     }
 
-    /* 序號圈圈 */
     .circle-badge {
       position: absolute;
       top: 6px;
@@ -385,7 +380,6 @@
       color: #1e293b;
     }
 
-    /* 作答底部控制列 */
     .quiz-controls {
       display: flex;
       gap: 12px;
@@ -414,15 +408,111 @@
       color: #475569;
     }
 
-    .btn-reset:hover {
-      background: #cbd5e1;
-    }
-
     .feedback-msg {
       font-size: 0.95rem;
       font-weight: 700;
       margin-top: 8px;
       min-height: 24px;
+    }
+
+    /* ================= 第二大題：句子回應選擇 ================= */
+    .part-b-box {
+      width: 100%;
+      max-width: 620px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      margin: auto 0;
+    }
+
+    .audio-play-big-btn {
+      background: #2563eb;
+      color: white;
+      border: none;
+      border-radius: 50px;
+      padding: 12px 32px;
+      font-size: 1.1rem;
+      font-weight: 800;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      box-shadow: 0 4px 14px rgba(37, 99, 235, 0.3);
+      margin-bottom: 24px;
+      transition: all 0.2s;
+    }
+
+    .audio-play-big-btn:hover {
+      background: #1d4ed8;
+      transform: translateY(-2px);
+    }
+
+    .options-list {
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      margin-bottom: 20px;
+    }
+
+    .option-btn {
+      width: 100%;
+      background: #ffffff;
+      border: 2px solid #e2e8f0;
+      border-radius: 16px;
+      padding: 14px 20px;
+      font-size: 1.05rem;
+      font-weight: 700;
+      color: #1e293b;
+      cursor: pointer;
+      text-align: left;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      transition: all 0.2s;
+      box-shadow: 0 3px 6px rgba(0,0,0,0.03);
+    }
+
+    .option-btn:hover:not(:disabled) {
+      border-color: #3b82f6;
+      background: #f8fafc;
+      transform: translateX(4px);
+    }
+
+    .option-btn.correct {
+      border-color: var(--success-color);
+      background: #ecfdf5;
+      color: #065f46;
+    }
+
+    .option-btn.wrong {
+      border-color: var(--error-color);
+      background: #fef2f2;
+      color: #991b1b;
+    }
+
+    .option-label {
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      background: #f1f5f9;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.9rem;
+      font-weight: 800;
+      color: #475569;
+      flex-shrink: 0;
+    }
+
+    .option-btn.correct .option-label {
+      background: var(--success-color);
+      color: white;
+    }
+
+    .option-btn.wrong .option-label {
+      background: var(--error-color);
+      color: white;
     }
 
     /* 準備中視圖 */
@@ -443,6 +533,7 @@
       .cards-grid { grid-template-columns: repeat(2, 1fr); gap: 8px; }
       .card-word { font-size: 0.8rem; }
       .circle-badge { width: 24px; height: 24px; font-size: 0.8rem; }
+      .option-btn { font-size: 0.95rem; padding: 12px 14px; }
     }
   </style>
 </head>
@@ -482,7 +573,7 @@
         <!-- Book 1 -->
         <div class="book-column">
           <div class="column-title">Book 1</div>
-          <button class="unit-pill-btn book1" onclick="startRandomQuiz(book1_U1_U5_Data, 'Book 1')">U1 - U5</button>
+          <button class="unit-pill-btn book1" onclick="startFullQuizFlow()">U1 - U5</button>
           <button class="unit-pill-btn book1" onclick="openComingSoon('Book 1', 'U6 - U10')">U6 - U10</button>
           <button class="unit-pill-btn book1" onclick="openComingSoon('Book 1', 'U11 - U15')">U11 - U15</button>
         </div>
@@ -504,61 +595,102 @@
       <button class="btn-back" onclick="navigateTo('view-cover')">← 返回封面</button>
     </section>
 
-    <!-- 3. 作答練習區 -->
-    <section id="view-quiz" class="view-section">
+    <!-- 3. 第一大題：單字聽力排序 -->
+    <section id="view-quiz-partA" class="view-section">
       <div class="quiz-view-wrapper">
         <div class="quiz-nav-row">
-          <span id="quiz-title-badge" class="quiz-badge">Book 1 • U1~U5 綜合挑戰</span>
-          <span id="quiz-progress-badge" style="font-size: 0.85rem; color: #64748b; font-weight: 600;">回合 1 / 3</span>
+          <span class="quiz-badge">第一大題 • 單字排序</span>
+          <span id="partA-progress-badge" style="font-size: 0.85rem; color: #64748b; font-weight: 600;">回合 1 / 3</span>
         </div>
 
         <div class="quiz-instruction-bar">
           <button class="btn-audio" onclick="playCurrentRoundAudio()">
             <span>🔊 播放音檔</span>
           </button>
-          <span style="font-size: 0.85rem; color: #475569; font-weight: 600;">請聽音檔順序為圖片填入 1~6</span>
+          <span style="font-size: 0.85rem; color: #475569; font-weight: 600;">聽音檔順序為圖片填入 1~6</span>
         </div>
 
-        <!-- 圖片題目網格 -->
         <div id="cards-container" class="cards-grid"></div>
 
-        <!-- 控制按鈕 -->
         <div class="quiz-controls">
           <button class="btn-action btn-reset" onclick="resetUserOrder()">重置順序</button>
-          <button class="btn-action" onclick="submitAnswer()">送出答案</button>
-          <button id="btn-next" class="btn-action" style="background:#2563eb; display:none;" onclick="nextRound()">下一回 →</button>
+          <button class="btn-action" onclick="submitPartAAnswer()">送出答案</button>
+          <button id="btn-next-round" class="btn-action" style="background:#2563eb; display:none;" onclick="nextPartARound()">下一回 →</button>
+          <button id="btn-to-partB" class="btn-action" style="background:#10b981; display:none;" onclick="startPartB()">進入第二大題 →</button>
         </div>
 
-        <div id="feedback-text" class="feedback-msg"></div>
+        <div id="partA-feedback-text" class="feedback-msg"></div>
         <button class="btn-back" onclick="navigateTo('view-topics')">← 返回選單</button>
       </div>
     </section>
 
-    <!-- 4. 建設中提示區 -->
+    <!-- 4. 第二大題：句子回應聽力選擇 (10 題抽 5 題) -->
+    <section id="view-quiz-partB" class="view-section">
+      <div class="part-b-box">
+        <div class="quiz-nav-row">
+          <span class="quiz-badge" style="background: #fdf2f8; color: #be185d;">第二大題 • 聽力問答</span>
+          <span id="partB-progress-badge" style="font-size: 0.85rem; color: #64748b; font-weight: 600;">第 1 / 5 題</span>
+        </div>
+
+        <!-- 依精準時間段播放長音檔 -->
+        <button class="audio-play-big-btn" onclick="playPartBCurrentAudio()">
+          <span>🔊 播放題目語音</span>
+        </button>
+
+        <div class="options-list" id="options-container"></div>
+
+        <div id="partB-feedback-text" class="feedback-msg"></div>
+
+        <button id="btn-next-partB" class="btn-action" style="background:#2563eb; display:none; margin-top:10px;" onclick="nextPartBQuestion()">下一題 →</button>
+        <button id="btn-finish-all" class="btn-action" style="background:#10b981; display:none; margin-top:10px;" onclick="finishAllQuizzes()">完成所有練習 🎉</button>
+
+        <button class="btn-back" onclick="navigateTo('view-topics')">← 返回選單</button>
+      </div>
+    </section>
+
+    <!-- 5. 建設中提示區 -->
     <section id="view-coming-soon" class="view-section">
       <div class="coming-soon-box">
         <div style="font-size: 3rem; margin-bottom: 12px;">🎧</div>
         <h3 id="cs-title" style="color: #1e293b; margin-bottom: 8px;">單元準備中</h3>
-        <p style="color: #64748b; font-size: 0.9rem;">此範圍之獨立題庫與音檔即將上線！</p>
+        <p style="color: #64748b; font-size: 0.9rem;">此範圍之題庫與音檔即將上線！</p>
       </div>
       <button class="btn-back" onclick="navigateTo('view-topics')">← 返回選單</button>
     </section>
 
   </main>
 
-  <!-- 引入外部題庫檔案 -->
+  <!-- 引入獨立題庫檔 -->
   <script src="book1_u1_u5.js"></script>
 
   <script>
-    const TOTAL_ROUNDS = 3;      // 總共玩三次
-    const ITEMS_PER_ROUND = 6;    // 每回合 6 張圖
-    let generatedRounds = [];     // 儲存隨機生成的 3 回合題目
-    let currentRoundIndex = 0;
-    let activeBookName = '';
-    let userSelections = [];
+    // 全域音訊物件（共用長音檔）
+    let partBAudio = null;
+    let audioStopTimer = null;
 
-    // 切換視圖
+    // 第一大題變數
+    const TOTAL_PART_A_ROUNDS = 3;
+    const ITEMS_PER_ROUND = 6;
+    let partAGeneratedRounds = [];
+    let currentPartARoundIdx = 0;
+    let partASelections = [];
+
+    // 第二大題變數
+    const TOTAL_PART_B_QUESTIONS = 5;
+    let partBPickedQuestions = [];
+    let currentPartBQuestionIdx = 0;
+    let partBScore = 0;
+
     function navigateTo(targetViewId) {
+      // 切換頁面時停止播放音檔
+      if (partBAudio) {
+        partBAudio.pause();
+        clearTimeout(audioStopTimer);
+      }
+      if ('speechSynthesis' in window) {
+        window.speechSynthesis.cancel();
+      }
+
       document.querySelectorAll('.view-section').forEach(view => {
         view.classList.remove('active');
       });
@@ -566,69 +698,62 @@
       if (targetView) targetView.classList.add('active');
     }
 
-    // 啟動五單元混搭隨機題庫（3 回合）
-    function startRandomQuiz(rawBankData, bookName) {
-      if (!rawBankData || rawBankData.length === 0) {
-        alert('題庫資料載入失敗，請確認 book1_u1_u5.js 檔案是否存在！');
+    function openComingSoon(bookName, range) {
+      document.getElementById('cs-title').textContent = `${bookName} • ${range}`;
+      navigateTo('view-coming-soon');
+    }
+
+    /* ================= 啟動整個練習流程 ================= */
+    function startFullQuizFlow() {
+      if (typeof book1_U1_U5_Data === 'undefined' || typeof book1_PartB_Data === 'undefined') {
+        alert('請確認已在專案中正確引入 book1_u1_u5.js 題庫！');
         return;
       }
-      activeBookName = bookName;
+      initPartA();
+      navigateTo('view-quiz-partA');
+    }
 
-      // 1. 將 U1 ~ U5 的所有單字抽成一個大單字池 (共 30 個單字)
+    /* ================= 第一大題邏輯 ================= */
+    function initPartA() {
+      // 1. 合併 5 個單元單字 (共 30 個)
       let allItemsPool = [];
-      rawBankData.forEach(unitData => {
+      book1_U1_U5_Data.forEach(unitData => {
         unitData.items.forEach(item => {
-          allItemsPool.push({
-            ...item,
-            sourceUnit: unitData.unit
-          });
+          allItemsPool.push({ ...item, sourceUnit: unitData.unit });
         });
       });
 
-      // 2. 隨機生成 3 回合，每回從單字池隨機挑選 6 個不重複單字
-      generatedRounds = [];
+      // 2. 隨機生成 3 回合
+      partAGeneratedRounds = [];
       let shuffledPool = [...allItemsPool].sort(() => Math.random() - 0.5);
 
-      for (let r = 0; r < TOTAL_ROUNDS; r++) {
-        // 如果池中單字不夠抽，再重新洗牌補足
+      for (let r = 0; r < TOTAL_PART_A_ROUNDS; r++) {
         if (shuffledPool.length < ITEMS_PER_ROUND) {
           shuffledPool = [...allItemsPool].sort(() => Math.random() - 0.5);
         }
-        const pickedItems = shuffledPool.splice(0, ITEMS_PER_ROUND);
+        const picked = shuffledPool.splice(0, ITEMS_PER_ROUND);
+        const displayItems = [...picked].sort(() => Math.random() - 0.5);
+        const correctSequenceWords = [...picked].sort(() => Math.random() - 0.5).map(i => i.word);
 
-        // 畫面展示的卡片順序隨機洗牌
-        const displayItems = [...pickedItems].sort(() => Math.random() - 0.5);
-
-        // 題目聽力的正確順序（1 到 6 的隨機排列）
-        const correctSequenceWords = [...pickedItems].sort(() => Math.random() - 0.5).map(item => item.word);
-
-        generatedRounds.push({
+        partAGeneratedRounds.push({
           round: r + 1,
           displayItems: displayItems,
           correctOrderWords: correctSequenceWords
         });
       }
 
-      currentRoundIndex = 0;
-      loadRound(currentRoundIndex);
-      navigateTo('view-quiz');
+      currentPartARoundIdx = 0;
+      loadPartARound(currentPartARoundIdx);
     }
 
-    // 未開放提示
-    function openComingSoon(bookName, range) {
-      document.getElementById('cs-title').textContent = `${bookName} • ${range}`;
-      navigateTo('view-coming-soon');
-    }
+    function loadPartARound(roundIdx) {
+      const roundData = partAGeneratedRounds[roundIdx];
+      partASelections = [];
 
-    // 載入指定回合
-    function loadRound(roundIdx) {
-      const roundData = generatedRounds[roundIdx];
-      userSelections = [];
-
-      document.getElementById('quiz-title-badge').textContent = `${activeBookName} • U1~U5 綜合挑戰`;
-      document.getElementById('quiz-progress-badge').textContent = `回合 ${roundIdx + 1} / ${TOTAL_ROUNDS}`;
-      document.getElementById('feedback-text').textContent = '';
-      document.getElementById('btn-next').style.display = 'none';
+      document.getElementById('partA-progress-badge').textContent = `回合 ${roundIdx + 1} / ${TOTAL_PART_A_ROUNDS}`;
+      document.getElementById('partA-feedback-text').textContent = '';
+      document.getElementById('btn-next-round').style.display = 'none';
+      document.getElementById('btn-to-partB').style.display = 'none';
 
       const container = document.getElementById('cards-container');
       container.innerHTML = '';
@@ -637,7 +762,7 @@
         const card = document.createElement('div');
         card.className = 'order-card';
         card.id = `card-${item.id}`;
-        card.onclick = () => toggleSelectCard(item.word);
+        card.onclick = () => toggleSelectPartACard(item.word);
 
         card.innerHTML = `
           <div class="circle-badge" id="badge-${item.word}"></div>
@@ -650,27 +775,24 @@
       });
     }
 
-    // 點擊卡片設定或取消序號
-    function toggleSelectCard(word) {
-      const existingIndex = userSelections.indexOf(word);
-
+    function toggleSelectPartACard(word) {
+      const existingIndex = partASelections.indexOf(word);
       if (existingIndex > -1) {
-        userSelections.splice(existingIndex, 1);
+        partASelections.splice(existingIndex, 1);
       } else {
-        if (userSelections.length < ITEMS_PER_ROUND) {
-          userSelections.push(word);
+        if (partASelections.length < ITEMS_PER_ROUND) {
+          partASelections.push(word);
         }
       }
-      updateCardsUI();
+      updatePartACardsUI();
     }
 
-    // 更新介面上的序號
-    function updateCardsUI() {
-      const roundData = generatedRounds[currentRoundIndex];
+    function updatePartACardsUI() {
+      const roundData = partAGeneratedRounds[currentPartARoundIdx];
       roundData.displayItems.forEach(item => {
         const card = document.getElementById(`card-${item.id}`);
         const badge = document.getElementById(`badge-${item.word}`);
-        const orderIndex = userSelections.indexOf(item.word);
+        const orderIndex = partASelections.indexOf(item.word);
 
         if (orderIndex > -1) {
           card.classList.add('selected');
@@ -682,18 +804,16 @@
       });
     }
 
-    // 重置順序
     function resetUserOrder() {
-      userSelections = [];
-      updateCardsUI();
-      document.getElementById('feedback-text').textContent = '';
-      document.getElementById('btn-next').style.display = 'none';
+      partASelections = [];
+      updatePartACardsUI();
+      document.getElementById('partA-feedback-text').textContent = '';
+      document.getElementById('btn-next-round').style.display = 'none';
+      document.getElementById('btn-to-partB').style.display = 'none';
     }
 
-    // 播放當前混搭回合音檔
     function playCurrentRoundAudio() {
-      const roundData = generatedRounds[currentRoundIndex];
-      // 依據本回合正確順序進行高品質語音朗讀
+      const roundData = partAGeneratedRounds[currentPartARoundIdx];
       if ('speechSynthesis' in window) {
         window.speechSynthesis.cancel();
         const textToSpeak = roundData.correctOrderWords.map((w, idx) => `Number ${idx + 1}, ${w}`).join('. ');
@@ -701,26 +821,23 @@
         utterance.lang = 'en-US';
         utterance.rate = 0.88;
         window.speechSynthesis.speak(utterance);
-      } else {
-        alert('瀏覽器未支援語音播放');
       }
     }
 
-    // 驗證答案
-    function submitAnswer() {
-      if (userSelections.length < ITEMS_PER_ROUND) {
-        const fb = document.getElementById('feedback-text');
+    function submitPartAAnswer() {
+      if (partASelections.length < ITEMS_PER_ROUND) {
+        const fb = document.getElementById('partA-feedback-text');
         fb.style.color = '#ef4444';
         fb.textContent = '請先為全部 6 張圖片完成排序再送出！';
         return;
       }
 
-      const roundData = generatedRounds[currentRoundIndex];
+      const roundData = partAGeneratedRounds[currentPartARoundIdx];
       let isAllCorrect = true;
 
       roundData.displayItems.forEach(item => {
         const card = document.getElementById(`card-${item.id}`);
-        const userOrder = userSelections.indexOf(item.word);
+        const userOrder = partASelections.indexOf(item.word);
         const correctOrder = roundData.correctOrderWords.indexOf(item.word);
 
         if (userOrder === correctOrder) {
@@ -731,26 +848,131 @@
         }
       });
 
-      const fb = document.getElementById('feedback-text');
+      const fb = document.getElementById('partA-feedback-text');
       if (isAllCorrect) {
         fb.style.color = '#10b981';
         fb.textContent = '🎉 太棒了！本回排序全數正確！';
-        document.getElementById('btn-next').style.display = 'inline-block';
+        if (currentPartARoundIdx < TOTAL_PART_A_ROUNDS - 1) {
+          document.getElementById('btn-next-round').style.display = 'inline-block';
+        } else {
+          document.getElementById('btn-to-partB').style.display = 'inline-block';
+        }
       } else {
         fb.style.color = '#ef4444';
         fb.textContent = '❌ 有部分順序錯誤，可點擊「重置順序」再試一次！';
       }
     }
 
-    // 下一回合
-    function nextRound() {
-      if (currentRoundIndex < TOTAL_ROUNDS - 1) {
-        currentRoundIndex++;
-        loadRound(currentRoundIndex);
-      } else {
-        alert('🎉 恭喜你！已完成 3 回合全部挑戰！');
-        navigateTo('view-topics');
+    function nextPartARound() {
+      currentPartARoundIdx++;
+      loadPartARound(currentPartARoundIdx);
+    }
+
+    /* ================= 第二大題邏輯（10 抽 5） ================= */
+    function startPartB() {
+      // 10 題隨機抽 5 題
+      const allQ = [...book1_PartB_Data.questions];
+      partBPickedQuestions = allQ.sort(() => Math.random() - 0.5).slice(0, TOTAL_PART_B_QUESTIONS);
+      currentPartBQuestionIdx = 0;
+      partBScore = 0;
+
+      // 初始化長音檔
+      if (!partBAudio) {
+        partBAudio = new Audio(book1_PartB_Data.audioFile);
       }
+
+      navigateTo('view-quiz-partB');
+      loadPartBQuestion(currentPartBQuestionIdx);
+    }
+
+    function loadPartBQuestion(qIdx) {
+      const q = partBPickedQuestions[qIdx];
+      document.getElementById('partB-progress-badge').textContent = `第 ${qIdx + 1} / ${TOTAL_PART_B_QUESTIONS} 題`;
+      document.getElementById('partB-feedback-text').textContent = '';
+      document.getElementById('btn-next-partB').style.display = 'none';
+      document.getElementById('btn-finish-all').style.display = 'none';
+
+      const container = document.getElementById('options-container');
+      container.innerHTML = '';
+
+      q.options.forEach(opt => {
+        const btn = document.createElement('button');
+        btn.className = 'option-btn';
+        btn.innerHTML = `<span class="option-label">${opt.label}</span><span>${opt.text}</span>`;
+        btn.onclick = () => selectPartBOption(opt.label, q.answer, btn);
+        container.appendChild(btn);
+      });
+
+      // 自動播一次題目
+      playPartBCurrentAudio();
+    }
+
+    // 依精確秒數播放長音檔片段
+    function playPartBCurrentAudio() {
+      const q = partBPickedQuestions[currentPartBQuestionIdx];
+      clearTimeout(audioStopTimer);
+
+      if (partBAudio) {
+        partBAudio.currentTime = q.start;
+        partBAudio.play().then(() => {
+          const duration = (q.end - q.start) * 1000;
+          audioStopTimer = setTimeout(() => {
+            partBAudio.pause();
+          }, duration);
+        }).catch(() => {
+          // 音檔不存在時 fallback 語音朗讀題目
+          if ('speechSynthesis' in window) {
+            window.speechSynthesis.cancel();
+            const utterance = new SpeechSynthesisUtterance(q.script);
+            utterance.lang = 'en-US';
+            utterance.rate = 0.9;
+            window.speechSynthesis.speak(utterance);
+          }
+        });
+      }
+    }
+
+    // 選擇答案
+    function selectPartBOption(selectedLabel, correctLabel, clickedBtn) {
+      // 停止音檔
+      if (partBAudio) {
+        partBAudio.pause();
+        clearTimeout(audioStopTimer);
+      }
+
+      // 鎖定所有選項按鈕
+      document.querySelectorAll('.option-btn').forEach(btn => {
+        btn.disabled = true;
+      });
+
+      const fb = document.getElementById('partB-feedback-text');
+
+      if (selectedLabel === correctLabel) {
+        clickedBtn.classList.add('correct');
+        fb.style.color = '#10b981';
+        fb.textContent = '🎉 答對了！';
+        partBScore++;
+      } else {
+        clickedBtn.classList.add('wrong');
+        fb.style.color = '#ef4444';
+        fb.textContent = `❌ 答錯了！正確答案是 (${correctLabel})`;
+      }
+
+      if (currentPartBQuestionIdx < TOTAL_PART_B_QUESTIONS - 1) {
+        document.getElementById('btn-next-partB').style.display = 'inline-block';
+      } else {
+        document.getElementById('btn-finish-all').style.display = 'inline-block';
+      }
+    }
+
+    function nextPartBQuestion() {
+      currentPartBQuestionIdx++;
+      loadPartBQuestion(currentPartBQuestionIdx);
+    }
+
+    function finishAllQuizzes() {
+      alert(`🎉 恭喜完成所有練習！\n第二大題答對題數：${partBScore} / ${TOTAL_PART_B_QUESTIONS}`);
+      navigateTo('view-topics');
     }
   </script>
 </body>

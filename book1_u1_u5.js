@@ -1,20 +1,12 @@
 /* ========================================================
  * Let's Speak - Book 1: Unit 1 ~ Unit 5 題庫資料
- * 檔名: book1_u1_u5.js
- * 
- * 說明：
- * - 依據課本 B 部分 (Listen, repeat and number) 製作
- * - 每個 Unit 包含 6 個單字/圖片項目與正確聽力順序
- * - 圖片預設路徑放於 images/ 資料夾，音檔放於 audio/ 資料夾
  * ======================================================== */
 
+// 第一大題：單字聽力排序（30 個單字池）
 const book1_U1_U5_Data = [
   {
     unit: "Unit 1",
     title: "Welcome to Our School",
-    audioSrc: "audio/b1_u1_track02.mp3",
-    // 聽力題正確單字排序 (1 ~ 6)
-    correctOrderWords: ["school", "city", "neighborhood", "class", "town", "party"],
     items: [
       { id: "b1_u1_1", word: "school", image: "images/b1_u1_school.jpg" },
       { id: "b1_u1_2", word: "city", image: "images/b1_u1_city.jpg" },
@@ -27,8 +19,6 @@ const book1_U1_U5_Data = [
   {
     unit: "Unit 2",
     title: "Nice to Meet You",
-    audioSrc: "audio/b1_u2_track08.mp3",
-    correctOrderWords: ["mother", "father", "brother", "sister", "teacher", "classmate"],
     items: [
       { id: "b1_u2_1", word: "mother", image: "images/b1_u2_mother.jpg" },
       { id: "b1_u2_2", word: "father", image: "images/b1_u2_father.jpg" },
@@ -41,8 +31,6 @@ const book1_U1_U5_Data = [
   {
     unit: "Unit 3",
     title: "She's Tall",
-    audioSrc: "audio/b1_u3_track14.mp3",
-    correctOrderWords: ["T-shirt", "skirt", "cap", "shoes", "jeans", "pants"],
     items: [
       { id: "b1_u3_1", word: "T-shirt", image: "images/b1_u3_tshirt.jpg" },
       { id: "b1_u3_2", word: "skirt", image: "images/b1_u3_skirt.jpg" },
@@ -55,8 +43,6 @@ const book1_U1_U5_Data = [
   {
     unit: "Unit 4",
     title: "It's \"Good Morning\"",
-    audioSrc: "audio/b1_u4_track20.mp3",
-    correctOrderWords: ["good morning", "good afternoon", "good evening", "hi", "how are you", "hello"],
     items: [
       { id: "b1_u4_1", word: "good morning", image: "images/b1_u4_morning.jpg" },
       { id: "b1_u4_2", word: "good afternoon", image: "images/b1_u4_afternoon.jpg" },
@@ -69,8 +55,6 @@ const book1_U1_U5_Data = [
   {
     unit: "Unit 5",
     title: "How's the Weather?",
-    audioSrc: "audio/b1_u5_track26.mp3",
-    correctOrderWords: ["sunny", "cloudy", "windy", "rainy", "hot", "warm"],
     items: [
       { id: "b1_u5_1", word: "sunny", image: "images/b1_u5_sunny.jpg" },
       { id: "b1_u5_2", word: "cloudy", image: "images/b1_u5_cloudy.jpg" },
@@ -81,3 +65,130 @@ const book1_U1_U5_Data = [
     ]
   }
 ];
+
+// 第二大題：句子聽力最佳回應（10 題抽 5 題）
+const book1_PartB_Data = {
+  audioFile: "audio/b1_u1_u5_test_b.mp3", // 請將上傳的完整長音檔放入 audio/ 資料夾並命名為此
+  questions: [
+    {
+      id: 1,
+      script: "How do you spell your name?",
+      start: 0.0,
+      end: 4.5,
+      options: [
+        { label: "A", text: "I’m Ruby." },
+        { label: "B", text: "It’s J-E-N-N-Y." },
+        { label: "C", text: "It’s Lisa." }
+      ],
+      answer: "B"
+    },
+    {
+      id: 2,
+      script: "Hey there, I’m Allen. What’s your name?",
+      start: 4.5,
+      end: 9.8,
+      options: [
+        { label: "A", text: "Hi, Allen. I’m Kelly!" },
+        { label: "B", text: "Nice to meet you." },
+        { label: "C", text: "Welcome to our school." }
+      ],
+      answer: "A"
+    },
+    {
+      id: 3,
+      script: "Eric, this is my mother.",
+      start: 9.8,
+      end: 14.5,
+      options: [
+        { label: "A", text: "It’s E-R-I-C." },
+        { label: "B", text: "Hello, Mr. Smith." },
+        { label: "C", text: "Hi, nice to meet you, Mrs. Smith." }
+      ],
+      answer: "C"
+    },
+    {
+      id: 4,
+      script: "How old is your brother?",
+      start: 14.5,
+      end: 19.5,
+      options: [
+        { label: "A", text: "He’s fifteen years old." },
+        { label: "B", text: "He has short hair." },
+        { label: "C", text: "He is tall." }
+      ],
+      answer: "A"
+    },
+    {
+      id: 5,
+      script: "Nice to meet you. Welcome to our school.",
+      start: 19.5,
+      end: 25.5,
+      options: [
+        { label: "A", text: "How are you?" },
+        { label: "B", text: "See you." },
+        { label: "C", text: "It’s nice to meet you, too." }
+      ],
+      answer: "C"
+    },
+    {
+      id: 6,
+      script: "What’s the weather like today?",
+      start: 25.5,
+      end: 30.2,
+      options: [
+        { label: "A", text: "Let’s read books at home." },
+        { label: "B", text: "It’s cool and cloudy." },
+        { label: "C", text: "See you later." }
+      ],
+      answer: "B"
+    },
+    {
+      id: 7,
+      script: "Is your mother wearing a yellow T-shirt?",
+      start: 30.2,
+      end: 36.2,
+      options: [
+        { label: "A", text: "Yes, she is." },
+        { label: "B", text: "No, he isn’t." },
+        { label: "C", text: "Yes, she’s wearing a yellow cap." }
+      ],
+      answer: "A"
+    },
+    {
+      id: 8,
+      script: "What does your sister look like?",
+      start: 36.2,
+      end: 40.8,
+      options: [
+        { label: "A", text: "She’s ten." },
+        { label: "B", text: "He’s handsome." },
+        { label: "C", text: "She’s tall." }
+      ],
+      answer: "C"
+    },
+    {
+      id: 9,
+      script: "How do you say “hi” in the afternoon?",
+      start: 40.8,
+      end: 46.5,
+      options: [
+        { label: "A", text: "It’s “Good morning.”" },
+        { label: "B", text: "It’s “Good afternoon.”" },
+        { label: "C", text: "It’s “Good evening.”" }
+      ],
+      answer: "B"
+    },
+    {
+      id: 10,
+      script: "We can fly kites in the park today. What do you think?",
+      start: 46.5,
+      end: 52.8,
+      options: [
+        { label: "A", text: "See you later." },
+        { label: "B", text: "Nice to meet you, too." },
+        { label: "C", text: "Sure! Let’s do it." }
+      ],
+      answer: "C"
+    }
+  ]
+};
