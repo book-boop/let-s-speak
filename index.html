@@ -12,6 +12,9 @@
       --btn-bg: #ffffff;
       --btn-shadow: 0 6px 18px rgba(0, 0, 0, 0.08);
       --btn-hover-shadow: 0 10px 24px rgba(0, 0, 0, 0.14);
+      --primary-color: #2563eb;
+      --success-color: #10b981;
+      --error-color: #ef4444;
     }
 
     * {
@@ -22,7 +25,6 @@
       -webkit-tap-highlight-color: transparent;
     }
 
-    /* 支援 100dvh 防範手機瀏覽器網址列伸展影響 */
     body {
       min-height: 100vh;
       min-height: 100dvh;
@@ -34,7 +36,7 @@
       overflow-x: hidden;
     }
 
-    /* 主卡片容器：電腦端上下貼齊（92dvh），手機端保證完整容納且不溢出 */
+    /* 主卡片容器：上下貼齊 */
     .app-card {
       background: var(--card-bg);
       width: 100%;
@@ -43,7 +45,7 @@
       height: 92dvh;
       border-radius: 36px;
       box-shadow: var(--card-shadow);
-      padding: clamp(20px, 3.5vh, 40px) clamp(16px, 4vw, 44px);
+      padding: clamp(16px, 3vh, 36px) clamp(16px, 3.5vw, 40px);
       display: flex;
       flex-direction: column;
       align-items: center;
@@ -58,7 +60,7 @@
     }
 
     .main-title {
-      font-size: clamp(1.8rem, 4vh, 3.2rem);
+      font-size: clamp(1.8rem, 3.8vh, 3rem);
       font-weight: 800;
       color: #1e293b;
       letter-spacing: 0.5px;
@@ -70,7 +72,7 @@
     .bracket {
       color: #94a3b8;
       font-weight: 300;
-      font-size: clamp(2rem, 4.5vh, 3.6rem);
+      font-size: clamp(2rem, 4vh, 3.4rem);
     }
 
     .arch-curve {
@@ -81,7 +83,7 @@
       border-top: 3px solid #cbd5e1;
     }
 
-    /* 頁面切換控制 */
+    /* 視圖切換 */
     .view-section {
       width: 100%;
       flex: 1;
@@ -90,6 +92,7 @@
       align-items: center;
       justify-content: center;
       animation: fadeIn 0.25s ease-in-out;
+      overflow-y: auto;
     }
 
     .view-section.active {
@@ -101,7 +104,7 @@
       to { opacity: 1; transform: translateY(0); }
     }
 
-    /* ================= 扉頁（首頁）：書本與按鈕 ================= */
+    /* ================= 扉頁（首頁） ================= */
     .books-row {
       display: flex;
       justify-content: center;
@@ -113,7 +116,6 @@
 
     .book-item {
       position: relative;
-      /* 依視窗高寬自動約束，手機窄螢幕下以寬度 28vw 為主，電腦下以高度為主，避免超出卡片 */
       width: min(28vw, 190px);
       aspect-ratio: 1 / 1.45;
       max-height: 48vh;
@@ -141,7 +143,6 @@
       display: block;
     }
 
-    /* START 按鈕 */
     .btn-capsule {
       background: var(--btn-bg);
       color: #334155;
@@ -162,10 +163,6 @@
       box-shadow: var(--btn-hover-shadow);
       border-color: #cbd5e1;
       color: #0f172a;
-    }
-
-    .btn-capsule:active {
-      transform: translateY(0);
     }
 
     /* ================= 選單頁（9 大主題） ================= */
@@ -219,7 +216,6 @@
     .unit-pill-btn.book2:hover { border-color: #3b82f6; color: #3b82f6; }
     .unit-pill-btn.book3:hover { border-color: #10b981; color: #10b981; }
 
-    /* 返回按鈕 */
     .btn-back {
       background: transparent;
       border: none;
@@ -234,31 +230,202 @@
       flex-shrink: 0;
     }
 
-    .btn-back:hover {
-      color: #0f172a;
-    }
+    .btn-back:hover { color: #0f172a; }
 
-    /* ================= 題目頁面 ================= */
+    /* ================= 排序作答練習區 ================= */
     .quiz-view-wrapper {
       width: 100%;
+      max-width: 780px;
       display: flex;
       flex-direction: column;
       align-items: center;
-      text-align: center;
       margin: auto 0;
+      padding: 10px 0;
     }
 
-    .quiz-header-badge {
-      display: inline-block;
-      padding: 6px 18px;
-      background: #f1f5f9;
-      color: #334155;
+    .quiz-nav-row {
+      width: 100%;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
+    }
+
+    .quiz-badge {
+      padding: 4px 16px;
+      background: #eff6ff;
+      color: #1d4ed8;
+      border-radius: 20px;
+      font-size: 0.95rem;
+      font-weight: 700;
+    }
+
+    .quiz-instruction-bar {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      background: #f8fafc;
+      padding: 8px 18px;
       border-radius: 30px;
-      font-size: clamp(0.9rem, 1.6vh, 1.05rem);
-      font-weight: 800;
-      margin-bottom: 18px;
+      border: 1px solid #e2e8f0;
+      margin-bottom: 14px;
     }
 
+    .btn-audio {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: #3b82f6;
+      color: white;
+      border: none;
+      padding: 6px 14px;
+      border-radius: 20px;
+      font-size: 0.9rem;
+      font-weight: 600;
+      cursor: pointer;
+      box-shadow: 0 2px 6px rgba(59, 130, 246, 0.3);
+      transition: all 0.2s;
+    }
+
+    .btn-audio:hover {
+      background: #2563eb;
+      transform: scale(1.03);
+    }
+
+    /* 6 格圖片排序網格 */
+    .cards-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: clamp(10px, 1.8vw, 16px);
+      width: 100%;
+      margin-bottom: 16px;
+    }
+
+    .order-card {
+      position: relative;
+      background: #ffffff;
+      border: 2px solid #e2e8f0;
+      border-radius: 14px;
+      padding: 8px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      box-shadow: 0 3px 8px rgba(0,0,0,0.04);
+      user-select: none;
+    }
+
+    .order-card:hover {
+      border-color: #94a3b8;
+      transform: translateY(-2px);
+    }
+
+    .order-card.selected {
+      border-color: #3b82f6;
+      background: #f0f7ff;
+    }
+
+    .order-card.correct {
+      border-color: var(--success-color);
+      background: #f0fdf4;
+    }
+
+    .order-card.wrong {
+      border-color: var(--error-color);
+      background: #fef2f2;
+    }
+
+    /* 序號圈圈 */
+    .circle-badge {
+      position: absolute;
+      top: 6px;
+      right: 6px;
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      border: 2px solid #60a5fa;
+      background: #ffffff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.95rem;
+      font-weight: 800;
+      color: #2563eb;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.06);
+    }
+
+    .order-card.selected .circle-badge {
+      background: #2563eb;
+      color: #ffffff;
+      border-color: #2563eb;
+    }
+
+    .card-thumb {
+      width: 100%;
+      aspect-ratio: 16 / 10;
+      border-radius: 8px;
+      overflow: hidden;
+      background: #f1f5f9;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 6px;
+    }
+
+    .card-thumb img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .card-word {
+      font-size: clamp(0.85rem, 1.4vh, 1.05rem);
+      font-weight: 700;
+      color: #1e293b;
+    }
+
+    /* 作答底部控制列 */
+    .quiz-controls {
+      display: flex;
+      gap: 12px;
+      align-items: center;
+    }
+
+    .btn-action {
+      background: #1e293b;
+      color: white;
+      border: none;
+      padding: 8px 24px;
+      border-radius: 20px;
+      font-size: 0.95rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .btn-action:hover {
+      background: #0f172a;
+      transform: translateY(-1px);
+    }
+
+    .btn-reset {
+      background: #e2e8f0;
+      color: #475569;
+    }
+
+    .btn-reset:hover {
+      background: #cbd5e1;
+    }
+
+    .feedback-msg {
+      font-size: 0.95rem;
+      font-weight: 700;
+      margin-top: 8px;
+      min-height: 24px;
+    }
+
+    /* 準備中視圖 */
     .coming-soon-box {
       padding: clamp(24px, 4vh, 36px) 16px;
       background: #f8fafc;
@@ -266,55 +433,16 @@
       border-radius: 24px;
       width: 100%;
       max-width: 460px;
-      margin-bottom: 20px;
+      text-align: center;
+      margin: auto 0;
     }
 
-    .coming-soon-icon {
-      font-size: clamp(2.2rem, 4vh, 3rem);
-      margin-bottom: 8px;
-    }
-
-    .coming-soon-text {
-      color: #334155;
-      font-size: clamp(1.1rem, 2vh, 1.25rem);
-      font-weight: 800;
-      margin-bottom: 6px;
-    }
-
-    .coming-soon-sub {
-      color: #94a3b8;
-      font-size: clamp(0.85rem, 1.4vh, 0.95rem);
-      line-height: 1.4;
-    }
-
-    /* ================= 手機專屬響應微調 (Mobile Breakpoint) ================= */
     @media (max-width: 480px) {
-      body {
-        padding: 10px;
-      }
-      .app-card {
-        height: 94dvh;
-        border-radius: 28px;
-        padding: 24px 14px 20px;
-      }
-      .books-row {
-        gap: 8px;
-      }
-      .book-item {
-        width: 29vw;
-        border-radius: 12px;
-      }
-      .topics-columns-container {
-        gap: 6px;
-      }
-      .unit-pill-btn {
-        border-radius: 14px;
-        font-size: 0.8rem;
-        padding: 12px 2px;
-      }
-      .column-title {
-        font-size: 0.9rem;
-      }
+      body { padding: 10px; }
+      .app-card { height: 94dvh; border-radius: 28px; padding: 18px 12px; }
+      .cards-grid { grid-template-columns: repeat(2, 1fr); gap: 8px; }
+      .card-word { font-size: 0.8rem; }
+      .circle-badge { width: 24px; height: 24px; font-size: 0.8rem; }
     }
   </style>
 </head>
@@ -332,109 +460,269 @@
       <div class="arch-curve"></div>
     </header>
 
-    <!-- 1. 扉頁（首頁）：三本書與 START 按鈕 -->
+    <!-- 1. 扉頁（首頁） -->
     <section id="view-cover" class="view-section active">
       <div class="books-row">
-        <!-- 第 1 本書 -->
         <div class="book-item" title="Book 1 (U1-U15)">
           <img src="images/book 1.png" alt="Let's Speak Book 1" onerror="this.src='https://placehold.co/240x350/e0e7ff/1e3a8a?text=Book+1'">
         </div>
-        <!-- 第 2 本書 -->
         <div class="book-item" title="Book 2 (U1-U15)">
           <img src="images/book 2.png" alt="Let's Speak Book 2" onerror="this.src='https://placehold.co/240x350/fef2f2/ef4444?text=Book+2'">
         </div>
-        <!-- 第 3 本書 -->
         <div class="book-item" title="Book 3 (U1-U15)">
           <img src="images/book 3.png" alt="Let's Speak Book 3" onerror="this.src='https://placehold.co/240x350/ecfdf5/047857?text=Book+3'">
         </div>
       </div>
-
       <button id="start-btn" class="btn-capsule" onclick="navigateTo('view-topics')">START</button>
     </section>
 
-    <!-- 2. 選單頁（9 大主題：3 欄 x 3 列） -->
+    <!-- 2. 選單頁（9 大主題） -->
     <section id="view-topics" class="view-section">
       <div class="topics-columns-container">
-        
-        <!-- Book 1 欄位 -->
+        <!-- Book 1 -->
         <div class="book-column">
           <div class="column-title">Book 1</div>
-          <button class="unit-pill-btn book1" onclick="openTopic('Book 1', 'U1 - U5')">U1 - U5</button>
-          <button class="unit-pill-btn book1" onclick="openTopic('Book 1', 'U6 - U10')">U6 - U10</button>
-          <button class="unit-pill-btn book1" onclick="openTopic('Book 1', 'U11 - U15')">U11 - U15</button>
+          <button class="unit-pill-btn book1" onclick="startQuiz(book1_U1_U5_Data, 'Book 1')">U1 - U5</button>
+          <button class="unit-pill-btn book1" onclick="openComingSoon('Book 1', 'U6 - U10')">U6 - U10</button>
+          <button class="unit-pill-btn book1" onclick="openComingSoon('Book 1', 'U11 - U15')">U11 - U15</button>
         </div>
-
-        <!-- Book 2 欄位 -->
+        <!-- Book 2 -->
         <div class="book-column">
           <div class="column-title">Book 2</div>
-          <button class="unit-pill-btn book2" onclick="openTopic('Book 2', 'U1 - U5')">U1 - U5</button>
-          <button class="unit-pill-btn book2" onclick="openTopic('Book 2', 'U6 - U10')">U6 - U10</button>
-          <button class="unit-pill-btn book2" onclick="openTopic('Book 2', 'U11 - U15')">U11 - U15</button>
+          <button class="unit-pill-btn book2" onclick="openComingSoon('Book 2', 'U1 - U5')">U1 - U5</button>
+          <button class="unit-pill-btn book2" onclick="openComingSoon('Book 2', 'U6 - U10')">U6 - U10</button>
+          <button class="unit-pill-btn book2" onclick="openComingSoon('Book 2', 'U11 - U15')">U11 - U15</button>
         </div>
-
-        <!-- Book 3 欄位 -->
+        <!-- Book 3 -->
         <div class="book-column">
           <div class="column-title">Book 3</div>
-          <button class="unit-pill-btn book3" onclick="openTopic('Book 3', 'U1 - U5')">U1 - U5</button>
-          <button class="unit-pill-btn book3" onclick="openTopic('Book 3', 'U6 - U10')">U6 - U10</button>
-          <button class="unit-pill-btn book3" onclick="openTopic('Book 3', 'U11 - U15')">U11 - U15</button>
+          <button class="unit-pill-btn book3" onclick="openComingSoon('Book 3', 'U1 - U5')">U1 - U5</button>
+          <button class="unit-pill-btn book3" onclick="openComingSoon('Book 3', 'U6 - U10')">U6 - U10</button>
+          <button class="unit-pill-btn book3" onclick="openComingSoon('Book 3', 'U11 - U15')">U11 - U15</button>
         </div>
-
       </div>
-
       <button class="btn-back" onclick="navigateTo('view-cover')">← 返回封面</button>
     </section>
 
-    <!-- 3. 作答練習區（預留資料空槽） -->
+    <!-- 3. 作答練習區 -->
     <section id="view-quiz" class="view-section">
       <div class="quiz-view-wrapper">
-        <div id="quiz-badge" class="quiz-header-badge">Book 1 • U1 - U5</div>
-        
-        <div class="coming-soon-box">
-          <div class="coming-soon-icon">🎧</div>
-          <div class="coming-soon-text">題目準備中</div>
-          <div class="coming-soon-sub">音檔、圖片與題庫載入中，待題庫填入後即可開始作答。</div>
+        <div class="quiz-nav-row">
+          <span id="quiz-title-badge" class="quiz-badge">Book 1 • Unit 1</span>
+          <span id="quiz-progress-badge" style="font-size: 0.85rem; color: #64748b; font-weight: 600;">第 1 / 5 單元</span>
         </div>
 
+        <div class="quiz-instruction-bar">
+          <button class="btn-audio" onclick="playQuestionAudio()">
+            <span>🔊 播放音檔</span>
+          </button>
+          <span style="font-size: 0.85rem; color: #475569; font-weight: 600;">請依聽到的順序點擊圖片填入 1~6</span>
+        </div>
+
+        <!-- 圖片題目網格 -->
+        <div id="cards-container" class="cards-grid"></div>
+
+        <!-- 控制按鈕 -->
+        <div class="quiz-controls">
+          <button class="btn-action btn-reset" onclick="resetUserOrder()">重置順序</button>
+          <button class="btn-action" onclick="submitAnswer()">送出答案</button>
+          <button id="btn-next" class="btn-action" style="background:#2563eb; display:none;" onclick="nextQuestion()">下一題 →</button>
+        </div>
+
+        <div id="feedback-text" class="feedback-msg"></div>
         <button class="btn-back" onclick="navigateTo('view-topics')">← 返回選單</button>
       </div>
     </section>
 
+    <!-- 4. 建設中提示區 -->
+    <section id="view-coming-soon" class="view-section">
+      <div class="coming-soon-box">
+        <div style="font-size: 3rem; margin-bottom: 12px;">🎧</div>
+        <h3 id="cs-title" style="color: #1e293b; margin-bottom: 8px;">單元準備中</h3>
+        <p style="color: #64748b; font-size: 0.9rem;">此範圍之獨立題庫與音檔即將上線！</p>
+      </div>
+      <button class="btn-back" onclick="navigateTo('view-topics')">← 返回選單</button>
+    </section>
+
   </main>
 
-  <script>
-    const quizDatabase = {
-      "Book 1": {
-        "U1 - U5": [],
-        "U6 - U10": [],
-        "U11 - U15": []
-      },
-      "Book 2": {
-        "U1 - U5": [],
-        "U6 - U10": [],
-        "U11 - U15": []
-      },
-      "Book 3": {
-        "U1 - U5": [],
-        "U6 - U10": [],
-        "U11 - U15": []
-      }
-    };
+  <!-- 引入外部題庫檔案 -->
+  <script src="book1_u1_u5.js"></script>
 
+  <script>
+    let activeQuestionBank = [];
+    let activeBookName = '';
+    let currentQuestionIndex = 0;
+    let userSelections = [];
+
+    // 切換視圖
     function navigateTo(targetViewId) {
       document.querySelectorAll('.view-section').forEach(view => {
         view.classList.remove('active');
       });
       const targetView = document.getElementById(targetViewId);
-      if (targetView) {
-        targetView.classList.add('active');
+      if (targetView) targetView.classList.add('active');
+    }
+
+    // 啟動指定題庫作答
+    function startQuiz(bankData, bookName) {
+      if (!bankData || bankData.length === 0) {
+        alert('題庫資料載入失敗，請確認 book1_u1_u5.js 檔案是否存在！');
+        return;
+      }
+      activeQuestionBank = bankData;
+      activeBookName = bookName;
+      currentQuestionIndex = 0;
+      loadQuestion(currentQuestionIndex);
+      navigateTo('view-quiz');
+    }
+
+    // 未開放提示
+    function openComingSoon(bookName, range) {
+      document.getElementById('cs-title').textContent = `${bookName} • ${range}`;
+      navigateTo('view-coming-soon');
+    }
+
+    // 載入當前題目
+    function loadQuestion(index) {
+      const qData = activeQuestionBank[index];
+      userSelections = [];
+
+      document.getElementById('quiz-title-badge').textContent = `${activeBookName} • ${qData.unit}`;
+      document.getElementById('quiz-progress-badge').textContent = `第 ${index + 1} / ${activeQuestionBank.length} 單元`;
+      document.getElementById('feedback-text').textContent = '';
+      document.getElementById('btn-next').style.display = 'none';
+
+      const container = document.getElementById('cards-container');
+      container.innerHTML = '';
+
+      qData.items.forEach(item => {
+        const card = document.createElement('div');
+        card.className = 'order-card';
+        card.id = `card-${item.id}`;
+        card.onclick = () => toggleSelectCard(item.word);
+
+        card.innerHTML = `
+          <div class="circle-badge" id="badge-${item.word}"></div>
+          <div class="card-thumb">
+            <img src="${item.image}" alt="${item.word}" onerror="this.src='https://placehold.co/300x180/f1f5f9/64748b?text=${encodeURIComponent(item.word)}'">
+          </div>
+          <div class="card-word">${item.word}</div>
+        `;
+        container.appendChild(card);
+      });
+    }
+
+    // 點擊卡片設定或取消序號
+    function toggleSelectCard(word) {
+      const existingIndex = userSelections.indexOf(word);
+
+      if (existingIndex > -1) {
+        userSelections.splice(existingIndex, 1);
+      } else {
+        if (userSelections.length < 6) {
+          userSelections.push(word);
+        }
+      }
+      updateCardsUI();
+    }
+
+    // 更新介面上的序號
+    function updateCardsUI() {
+      const qData = activeQuestionBank[currentQuestionIndex];
+      qData.items.forEach(item => {
+        const card = document.getElementById(`card-${item.id}`);
+        const badge = document.getElementById(`badge-${item.word}`);
+        const orderIndex = userSelections.indexOf(item.word);
+
+        if (orderIndex > -1) {
+          card.classList.add('selected');
+          badge.textContent = orderIndex + 1;
+        } else {
+          card.classList.remove('selected', 'correct', 'wrong');
+          badge.textContent = '';
+        }
+      });
+    }
+
+    // 重置順序
+    function resetUserOrder() {
+      userSelections = [];
+      updateCardsUI();
+      document.getElementById('feedback-text').textContent = '';
+      document.getElementById('btn-next').style.display = 'none';
+    }
+
+    // 播放音檔
+    function playQuestionAudio() {
+      const qData = activeQuestionBank[currentQuestionIndex];
+      if (qData.audioSrc) {
+        const audio = new Audio(qData.audioSrc);
+        audio.play().catch(() => {
+          speakFallback(qData.correctOrderWords);
+        });
+      } else {
+        speakFallback(qData.correctOrderWords);
       }
     }
 
-    function openTopic(bookName, unitRange) {
-      const badge = document.getElementById('quiz-badge');
-      badge.textContent = `${bookName} • ${unitRange}`;
-      navigateTo('view-quiz');
+    // 語音朗讀備援
+    function speakFallback(words) {
+      if ('speechSynthesis' in window) {
+        window.speechSynthesis.cancel();
+        const textToSpeak = words.map((w, idx) => `Number ${idx + 1}, ${w}`).join('. ');
+        const utterance = new SpeechSynthesisUtterance(textToSpeak);
+        utterance.lang = 'en-US';
+        utterance.rate = 0.9;
+        window.speechSynthesis.speak(utterance);
+      }
+    }
+
+    // 驗證答案
+    function submitAnswer() {
+      if (userSelections.length < 6) {
+        const fb = document.getElementById('feedback-text');
+        fb.style.color = '#ef4444';
+        fb.textContent = '請先為全部 6 張圖片完成排序再送出！';
+        return;
+      }
+
+      const qData = activeQuestionBank[currentQuestionIndex];
+      let isAllCorrect = true;
+
+      qData.items.forEach(item => {
+        const card = document.getElementById(`card-${item.id}`);
+        const userOrder = userSelections.indexOf(item.word);
+        const correctOrder = qData.correctOrderWords.indexOf(item.word);
+
+        if (userOrder === correctOrder) {
+          card.classList.add('correct');
+        } else {
+          card.classList.add('wrong');
+          isAllCorrect = false;
+        }
+      });
+
+      const fb = document.getElementById('feedback-text');
+      if (isAllCorrect) {
+        fb.style.color = '#10b981';
+        fb.textContent = '🎉 太棒了！全數排序正確！';
+        document.getElementById('btn-next').style.display = 'inline-block';
+      } else {
+        fb.style.color = '#ef4444';
+        fb.textContent = '❌ 有部分順序錯誤，可點擊「重置順序」再試一次！';
+      }
+    }
+
+    // 下一單元
+    function nextQuestion() {
+      if (currentQuestionIndex < activeQuestionBank.length - 1) {
+        currentQuestionIndex++;
+        loadQuestion(currentQuestionIndex);
+      } else {
+        alert('恭喜你！完成 Unit 1 ~ Unit 5 的所有練習！');
+        navigateTo('view-topics');
+      }
     }
   </script>
 </body>
