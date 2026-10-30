@@ -36,6 +36,7 @@
       overflow-x: hidden;
     }
 
+    /* 主卡片容器：上下貼齊防跑版 */
     .app-card {
       background: var(--card-bg);
       width: 100%;
@@ -101,7 +102,7 @@
       to { opacity: 1; transform: translateY(0); }
     }
 
-    /* ================= 首頁 ================= */
+    /* ================= 扉頁（首頁） ================= */
     .books-row {
       display: flex;
       justify-content: center;
@@ -162,7 +163,7 @@
       color: #0f172a;
     }
 
-    /* ================= 9 大主題選單 ================= */
+    /* ================= 選單頁（9 大主題） ================= */
     .topics-columns-container {
       width: 100%;
       max-width: 760px;
@@ -378,6 +379,7 @@
       font-size: clamp(0.85rem, 1.4vh, 1.05rem);
       font-weight: 700;
       color: #1e293b;
+      text-align: center;
     }
 
     .quiz-controls {
@@ -408,6 +410,10 @@
       color: #475569;
     }
 
+    .btn-reset:hover {
+      background: #cbd5e1;
+    }
+
     .feedback-msg {
       font-size: 0.95rem;
       font-weight: 700;
@@ -415,7 +421,7 @@
       min-height: 24px;
     }
 
-    /* ================= 第二大題：句子回應選擇 ================= */
+    /* ================= 第二大題：句子回應聽力選擇 ================= */
     .part-b-box {
       width: 100%;
       max-width: 620px;
@@ -573,8 +579,8 @@
         <!-- Book 1 -->
         <div class="book-column">
           <div class="column-title">Book 1</div>
-          <button class="unit-pill-btn book1" onclick="startFullQuizFlow()">U1 - U5</button>
-          <button class="unit-pill-btn book1" onclick="openComingSoon('Book 1', 'U6 - U10')">U6 - U10</button>
+          <button class="unit-pill-btn book1" onclick="startSectionQuiz(book1_U1_U5_Data, book1_PartB_Data, 'Book 1 • U1~U5')">U1 - U5</button>
+          <button class="unit-pill-btn book1" onclick="startSectionQuiz(book1_U6_U10_Data, book1_PartB_U6_U10_Data, 'Book 1 • U6~U10')">U6 - U10</button>
           <button class="unit-pill-btn book1" onclick="openComingSoon('Book 1', 'U11 - U15')">U11 - U15</button>
         </div>
         <!-- Book 2 -->
@@ -599,7 +605,7 @@
     <section id="view-quiz-partA" class="view-section">
       <div class="quiz-view-wrapper">
         <div class="quiz-nav-row">
-          <span class="quiz-badge">第一大題 • 單字排序</span>
+          <span id="partA-section-badge" class="quiz-badge">第一大題 • 單字排序</span>
           <span id="partA-progress-badge" style="font-size: 0.85rem; color: #64748b; font-weight: 600;">回合 1 / 3</span>
         </div>
 
@@ -628,7 +634,7 @@
     <section id="view-quiz-partB" class="view-section">
       <div class="part-b-box">
         <div class="quiz-nav-row">
-          <span class="quiz-badge" style="background: #fdf2f8; color: #be185d;">第二大題 • 聽力問答</span>
+          <span id="partB-section-badge" class="quiz-badge" style="background: #fdf2f8; color: #be185d;">第二大題 • 聽力問答</span>
           <span id="partB-progress-badge" style="font-size: 0.85rem; color: #64748b; font-weight: 600;">第 1 / 5 題</span>
         </div>
 
@@ -660,13 +666,19 @@
 
   </main>
 
-  <!-- 引入獨立題庫檔 -->
+  <!-- 引入獨立題庫檔（U1-U5 與 U6-U10） -->
   <script src="book1_u1_u5.js"></script>
+  <script src="book1_u6_u10.js"></script>
 
   <script>
-    // 全域音訊物件（共用長音檔）
-    let partBAudio = null;
-    let audioStopTimer = null;
+    // 當前選中的題庫資料參考
+    let activePartAData = null;
+    let activePartBData = null;
+    let currentSectionTitle = '';
+
+    // 全域音訊物件
+    let currentPartBAudio = null;
+    let audioTimeUpdateListener = null;
 
     // 第一大題變數
     const TOTAL_PART_A_ROUNDS = 3;
@@ -682,14 +694,7 @@
     let partBScore = 0;
 
     function navigateTo(targetViewId) {
-      // 切換頁面時停止播放音檔
-      if (partBAudio) {
-        partBAudio.pause();
-        clearTimeout(audioStopTimer);
-      }
-      if ('speechSynthesis' in window) {
-        window.speechSynthesis.cancel();
-      }
+      stopCurrentAudio();
 
       document.querySelectorAll('.view-section').forEach(view => {
         view.classList.remove('active');
@@ -698,26 +703,43 @@
       if (targetView) targetView.classList.add('active');
     }
 
+    function stopCurrentAudio() {
+      if (currentPartBAudio) {
+        currentPartBAudio.pause();
+        if (audioTimeUpdateListener) {
+          currentPartBAudio.removeEventListener('timeupdate', audioTimeUpdateListener);
+          audioTimeUpdateListener = null;
+        }
+      }
+      if ('speechSynthesis' in window) {
+        window.speechSynthesis.cancel();
+      }
+    }
+
     function openComingSoon(bookName, range) {
       document.getElementById('cs-title').textContent = `${bookName} • ${range}`;
       navigateTo('view-coming-soon');
     }
 
-    /* ================= 啟動整個練習流程 ================= */
-    function startFullQuizFlow() {
-      if (typeof book1_U1_U5_Data === 'undefined' || typeof book1_PartB_Data === 'undefined') {
-        alert('請確認已在專案中正確引入 book1_u1_u5.js 題庫！');
+    /* ================= 啟動所選單元範圍練習 ================= */
+    function startSectionQuiz(partAData, partBData, sectionTitle) {
+      if (!partAData || !partBData) {
+        alert('題庫尚未載入，請確認 book1_u1_u5.js 或 book1_u6_u10.js 檔案是否存在！');
         return;
       }
+      activePartAData = partAData;
+      activePartBData = partBData;
+      currentSectionTitle = sectionTitle;
+
       initPartA();
       navigateTo('view-quiz-partA');
     }
 
     /* ================= 第一大題邏輯 ================= */
     function initPartA() {
-      // 1. 合併 5 個單元單字 (共 30 個)
+      // 1. 合併該範圍 5 個單元的單字池 (30 個)
       let allItemsPool = [];
-      book1_U1_U5_Data.forEach(unitData => {
+      activePartAData.forEach(unitData => {
         unitData.items.forEach(item => {
           allItemsPool.push({ ...item, sourceUnit: unitData.unit });
         });
@@ -750,6 +772,7 @@
       const roundData = partAGeneratedRounds[roundIdx];
       partASelections = [];
 
+      document.getElementById('partA-section-badge').textContent = `${currentSectionTitle} • 單字排序`;
       document.getElementById('partA-progress-badge').textContent = `回合 ${roundIdx + 1} / ${TOTAL_PART_A_ROUNDS}`;
       document.getElementById('partA-feedback-text').textContent = '';
       document.getElementById('btn-next-round').style.display = 'none';
@@ -868,18 +891,15 @@
       loadPartARound(currentPartARoundIdx);
     }
 
-    /* ================= 第二大題邏輯（10 抽 5） ================= */
+    /* ================= 第二大題邏輯（10 抽 5 題） ================= */
     function startPartB() {
-      // 10 題隨機抽 5 題
-      const allQ = [...book1_PartB_Data.questions];
+      const allQ = [...activePartBData.questions];
       partBPickedQuestions = allQ.sort(() => Math.random() - 0.5).slice(0, TOTAL_PART_B_QUESTIONS);
       currentPartBQuestionIdx = 0;
       partBScore = 0;
 
-      // 初始化長音檔
-      if (!partBAudio) {
-        partBAudio = new Audio(book1_PartB_Data.audioFile);
-      }
+      // 初始化長音檔物件
+      currentPartBAudio = new Audio(activePartBData.audioFile);
 
       navigateTo('view-quiz-partB');
       loadPartBQuestion(currentPartBQuestionIdx);
@@ -887,6 +907,7 @@
 
     function loadPartBQuestion(qIdx) {
       const q = partBPickedQuestions[qIdx];
+      document.getElementById('partB-section-badge').textContent = `${currentSectionTitle} • 聽力問答`;
       document.getElementById('partB-progress-badge').textContent = `第 ${qIdx + 1} / ${TOTAL_PART_B_QUESTIONS} 題`;
       document.getElementById('partB-feedback-text').textContent = '';
       document.getElementById('btn-next-partB').style.display = 'none';
@@ -903,55 +924,45 @@
         container.appendChild(btn);
       });
 
-      // 自動播一次題目
+      // 自動播一次該題題目音檔
       playPartBCurrentAudio();
     }
 
-    // 在 index.html 中替換原有的 playPartBCurrentAudio 函式
-function playPartBCurrentAudio() {
-  const q = partBPickedQuestions[currentPartBQuestionIdx];
-  if (!partBAudio) {
-    partBAudio = new Audio(book1_PartB_Data.audioFile);
-  }
+    // 依精準時間標籤播放長音檔片段
+    function playPartBCurrentAudio() {
+      const q = partBPickedQuestions[currentPartBQuestionIdx];
+      stopCurrentAudio();
 
-  // 清除先前的事件與計時器
-  partBAudio.pause();
-  if (partBAudio._timeUpdateHandler) {
-    partBAudio.removeEventListener('timeupdate', partBAudio._timeUpdateHandler);
-  }
-
-  // 設定起始播放時間點
-  partBAudio.currentTime = q.start;
-
-  // 使用 timeupdate 即時監控結束點，精準度高且不漂移
-  partBAudio._timeUpdateHandler = function() {
-    if (partBAudio.currentTime >= q.end) {
-      partBAudio.pause();
-      partBAudio.removeEventListener('timeupdate', partBAudio._timeUpdateHandler);
-    }
-  };
-  partBAudio.addEventListener('timeupdate', partBAudio._timeUpdateHandler);
-
-  partBAudio.play().catch(() => {
-    // 找不到音檔時 fallback 語音朗讀
-    if ('speechSynthesis' in window) {
-      window.speechSynthesis.cancel();
-      const utterance = new SpeechSynthesisUtterance(q.script);
-      utterance.lang = 'en-US';
-      utterance.rate = 0.9;
-      window.speechSynthesis.speak(utterance);
-    }
-  });
-}
-    // 選擇答案
-    function selectPartBOption(selectedLabel, correctLabel, clickedBtn) {
-      // 停止音檔
-      if (partBAudio) {
-        partBAudio.pause();
-        clearTimeout(audioStopTimer);
+      if (!currentPartBAudio) {
+        currentPartBAudio = new Audio(activePartBData.audioFile);
       }
 
-      // 鎖定所有選項按鈕
+      currentPartBAudio.currentTime = q.start;
+
+      audioTimeUpdateListener = function() {
+        if (currentPartBAudio.currentTime >= q.end) {
+          currentPartBAudio.pause();
+          currentPartBAudio.removeEventListener('timeupdate', audioTimeUpdateListener);
+          audioTimeUpdateListener = null;
+        }
+      };
+      currentPartBAudio.addEventListener('timeupdate', audioTimeUpdateListener);
+
+      currentPartBAudio.play().catch(() => {
+        if ('speechSynthesis' in window) {
+          window.speechSynthesis.cancel();
+          const utterance = new SpeechSynthesisUtterance(q.script);
+          utterance.lang = 'en-US';
+          utterance.rate = 0.9;
+          window.speechSynthesis.speak(utterance);
+        }
+      });
+    }
+
+    // 點擊選項作答
+    function selectPartBOption(selectedLabel, correctLabel, clickedBtn) {
+      stopCurrentAudio();
+
       document.querySelectorAll('.option-btn').forEach(btn => {
         btn.disabled = true;
       });
