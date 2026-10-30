@@ -36,7 +36,6 @@
       overflow-x: hidden;
     }
 
-    /* 主卡片容器 */
     .app-card {
       background: var(--card-bg);
       width: 100%;
@@ -102,7 +101,7 @@
       to { opacity: 1; transform: translateY(0); }
     }
 
-    /* ================= 扉頁（首頁） ================= */
+    /* 扉頁 */
     .books-row {
       display: flex;
       justify-content: center;
@@ -134,7 +133,6 @@
       box-shadow: 0 18px 32px rgba(30, 41, 59, 0.22);
     }
 
-    /* 書本圖片改為 contain 完整呈現 */
     .book-item img {
       width: 100%;
       height: 100%;
@@ -164,7 +162,7 @@
       color: #0f172a;
     }
 
-    /* ================= 選單頁（9 大主題） ================= */
+    /* 9 大主題選單 */
     .topics-columns-container {
       width: 100%;
       max-width: 760px;
@@ -231,7 +229,7 @@
 
     .btn-back:hover { color: #0f172a; }
 
-    /* ================= 第一大題：單字排序 ================= */
+    /* 第一大題：單字排序 */
     .quiz-view-wrapper {
       width: 100%;
       max-width: 780px;
@@ -372,7 +370,6 @@
       padding: 4px;
     }
 
-    /* 單字題目圖片改為 contain 完整呈現 */
     .card-thumb img {
       width: 100%;
       height: 100%;
@@ -425,7 +422,7 @@
       min-height: 24px;
     }
 
-    /* ================= 第二大題：句子回應聽力選擇 ================= */
+    /* 第二大題：句子回應聽力選擇 */
     .part-b-box {
       width: 100%;
       max-width: 620px;
@@ -525,7 +522,6 @@
       color: white;
     }
 
-    /* 準備中視圖 */
     .coming-soon-box {
       padding: clamp(24px, 4vh, 36px) 16px;
       background: #f8fafc;
@@ -551,7 +547,6 @@
 
   <main class="app-card">
     
-    <!-- 頂部標題區 -->
     <header class="header-box">
       <h1 class="main-title">
         <span class="bracket">(</span>
@@ -585,7 +580,7 @@
           <div class="column-title">Book 1</div>
           <button class="unit-pill-btn book1" onclick="startSectionQuiz(book1_U1_U5_Data, book1_PartB_Data, 'Book 1 • U1~U5')">U1 - U5</button>
           <button class="unit-pill-btn book1" onclick="startSectionQuiz(book1_U6_U10_Data, book1_PartB_U6_U10_Data, 'Book 1 • U6~U10')">U6 - U10</button>
-          <button class="unit-pill-btn book1" onclick="openComingSoon('Book 1', 'U11 - U15')">U11 - U15</button>
+          <button class="unit-pill-btn book1" onclick="startSectionQuiz(book1_U11_U15_Data, book1_PartB_U11_U15_Data, 'Book 1 • U11~U15')">U11 - U15</button>
         </div>
         <!-- Book 2 -->
         <div class="book-column">
@@ -642,7 +637,6 @@
           <span id="partB-progress-badge" style="font-size: 0.85rem; color: #64748b; font-weight: 600;">第 1 / 5 題</span>
         </div>
 
-        <!-- 依精準時間段播放長音檔 -->
         <button class="audio-play-big-btn" onclick="playPartBCurrentAudio()">
           <span>🔊 播放題目語音</span>
         </button>
@@ -670,9 +664,10 @@
 
   </main>
 
-  <!-- 引入獨立題庫檔（U1-U5 與 U6-U10） -->
+  <!-- 引入獨立題庫檔（Book 1 完整三範圍） -->
   <script src="book1_u1_u5.js"></script>
   <script src="book1_u6_u10.js"></script>
+  <script src="book1_u11_u15.js"></script>
 
   <script>
     let activePartAData = null;
@@ -695,7 +690,6 @@
 
     function navigateTo(targetViewId) {
       stopCurrentAudio();
-
       document.querySelectorAll('.view-section').forEach(view => {
         view.classList.remove('active');
       });
@@ -723,7 +717,7 @@
 
     function startSectionQuiz(partAData, partBData, sectionTitle) {
       if (!partAData || !partBData) {
-        alert('題庫尚未載入，請確認 book1_u1_u5.js 或 book1_u6_u10.js 檔案是否存在！');
+        alert('題庫尚未載入，請確認對應的題庫 js 檔案是否存在！');
         return;
       }
       activePartAData = partAData;
