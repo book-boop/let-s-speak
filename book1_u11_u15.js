@@ -67,15 +67,15 @@ const book1_U11_U15_Data = [
   }
 ];
 
-// 第二大題：句子回應聽力選擇（10 題抽 5 題）
+// 第二大題：句子回應聽力選擇（波形校正後）
 const book1_PartB_U11_U15_Data = {
   audioFile: "audio/Test 3 track 08.mp3",
   questions: [
     {
       id: 1,
       script: "One. Do you like peaches?",
-      start: 0.0,
-      end: 3.8,
+      start: 1.2,
+      end: 4.9,
       options: [
         { label: "A", text: "Yes, I like oranges." },
         { label: "B", text: "Yes, I love them." },
@@ -86,8 +86,8 @@ const book1_PartB_U11_U15_Data = {
     {
       id: 2,
       script: "Two. Do you like tomatoes?",
-      start: 10.2,
-      end: 14.8,
+      start: 9.4,
+      end: 13.0,
       options: [
         { label: "A", text: "No, I’m not a fan." },
         { label: "B", text: "It’s mine." },
@@ -98,8 +98,8 @@ const book1_PartB_U11_U15_Data = {
     {
       id: 3,
       script: "Three. Which do you like better, strawberries or apples?",
-      start: 18.2,
-      end: 24.8,
+      start: 17.3,
+      end: 23.3,
       options: [
         { label: "A", text: "I like bananas." },
         { label: "B", text: "I don’t like grapes." },
@@ -110,8 +110,8 @@ const book1_PartB_U11_U15_Data = {
     {
       id: 4,
       script: "Four. What’s your favorite vegetable?",
-      start: 28.2,
-      end: 33.8,
+      start: 27.5,
+      end: 31.6,
       options: [
         { label: "A", text: "I love mushrooms." },
         { label: "B", text: "I love apples." },
@@ -122,8 +122,8 @@ const book1_PartB_U11_U15_Data = {
     {
       id: 5,
       script: "Five. How much is the glue?",
-      start: 37.0,
-      end: 42.0,
+      start: 35.9,
+      end: 39.7,
       options: [
         { label: "A", text: "It’s 10 years old." },
         { label: "B", text: "They’re 15 dollars." },
@@ -134,8 +134,8 @@ const book1_PartB_U11_U15_Data = {
     {
       id: 6,
       script: "Six. May I take your order?",
-      start: 45.2,
-      end: 49.8,
+      start: 43.9,
+      end: 47.4,
       options: [
         { label: "A", text: "No, how about you?" },
         { label: "B", text: "Anything else?" },
@@ -146,8 +146,8 @@ const book1_PartB_U11_U15_Data = {
     {
       id: 7,
       script: "Seven. I want to have a sleepover at my house this weekend. Are you coming?",
-      start: 53.0,
-      end: 61.2,
+      start: 51.8,
+      end: 59.2,
       options: [
         { label: "A", text: "Here you go." },
         { label: "B", text: "Whose party is it?" },
@@ -158,8 +158,8 @@ const book1_PartB_U11_U15_Data = {
     {
       id: 8,
       script: "Eight. I want to bring my favorite video game to the party.",
-      start: 64.8,
-      end: 71.0,
+      start: 63.5,
+      end: 69.8,
       options: [
         { label: "A", text: "Are you coming?" },
         { label: "B", text: "Let’s go shopping." },
@@ -170,8 +170,8 @@ const book1_PartB_U11_U15_Data = {
     {
       id: 9,
       script: "Nine. How much are the scissors?",
-      start: 75.5,
-      end: 81.0,
+      start: 74.2,
+      end: 78.4,
       options: [
         { label: "A", text: "They’re 60 dollars." },
         { label: "B", text: "It’s 50 dollars." },
@@ -182,8 +182,8 @@ const book1_PartB_U11_U15_Data = {
     {
       id: 10,
       script: "Ten. Anything to drink?",
-      start: 84.0,
-      end: 89.0,
+      start: 82.7,
+      end: 86.2,
       options: [
         { label: "A", text: "Yes, a large one." },
         { label: "B", text: "An apple juice, please." },
