@@ -36,7 +36,7 @@
       overflow-x: hidden;
     }
 
-    /* 主卡片容器：上下貼齊防跑版 */
+    /* 主卡片容器 */
     .app-card {
       background: var(--card-bg);
       width: 100%;
@@ -134,10 +134,11 @@
       box-shadow: 0 18px 32px rgba(30, 41, 59, 0.22);
     }
 
+    /* 書本圖片改為 contain 完整呈現 */
     .book-item img {
       width: 100%;
       height: 100%;
-      object-fit: cover;
+      object-fit: contain;
       display: block;
     }
 
@@ -349,6 +350,7 @@
       font-weight: 800;
       color: #2563eb;
       box-shadow: 0 2px 5px rgba(0,0,0,0.06);
+      z-index: 2;
     }
 
     .order-card.selected .circle-badge {
@@ -362,17 +364,19 @@
       aspect-ratio: 16 / 10;
       border-radius: 8px;
       overflow: hidden;
-      background: #f1f5f9;
+      background: #f8fafc;
       display: flex;
       align-items: center;
       justify-content: center;
       margin-bottom: 6px;
+      padding: 4px;
     }
 
+    /* 單字題目圖片改為 contain 完整呈現 */
     .card-thumb img {
       width: 100%;
       height: 100%;
-      object-fit: cover;
+      object-fit: contain;
     }
 
     .card-word {
@@ -671,23 +675,19 @@
   <script src="book1_u6_u10.js"></script>
 
   <script>
-    // 當前選中的題庫資料參考
     let activePartAData = null;
     let activePartBData = null;
     let currentSectionTitle = '';
 
-    // 全域音訊物件
     let currentPartBAudio = null;
     let audioTimeUpdateListener = null;
 
-    // 第一大題變數
     const TOTAL_PART_A_ROUNDS = 3;
     const ITEMS_PER_ROUND = 6;
     let partAGeneratedRounds = [];
     let currentPartARoundIdx = 0;
     let partASelections = [];
 
-    // 第二大題變數
     const TOTAL_PART_B_QUESTIONS = 5;
     let partBPickedQuestions = [];
     let currentPartBQuestionIdx = 0;
@@ -721,7 +721,6 @@
       navigateTo('view-coming-soon');
     }
 
-    /* ================= 啟動所選單元範圍練習 ================= */
     function startSectionQuiz(partAData, partBData, sectionTitle) {
       if (!partAData || !partBData) {
         alert('題庫尚未載入，請確認 book1_u1_u5.js 或 book1_u6_u10.js 檔案是否存在！');
@@ -735,9 +734,7 @@
       navigateTo('view-quiz-partA');
     }
 
-    /* ================= 第一大題邏輯 ================= */
     function initPartA() {
-      // 1. 合併該範圍 5 個單元的單字池 (30 個)
       let allItemsPool = [];
       activePartAData.forEach(unitData => {
         unitData.items.forEach(item => {
@@ -745,7 +742,6 @@
         });
       });
 
-      // 2. 隨機生成 3 回合
       partAGeneratedRounds = [];
       let shuffledPool = [...allItemsPool].sort(() => Math.random() - 0.5);
 
@@ -790,7 +786,7 @@
         card.innerHTML = `
           <div class="circle-badge" id="badge-${item.word}"></div>
           <div class="card-thumb">
-            <img src="${item.image}" alt="${item.word}" onerror="this.src='https://placehold.co/300x180/f1f5f9/64748b?text=${encodeURIComponent(item.word)}'">
+            <img src="${item.image}" alt="${item.word}" onerror="this.src='https://placehold.co/300x180/f8fafc/64748b?text=${encodeURIComponent(item.word)}'">
           </div>
           <div class="card-word">${item.word}</div>
         `;
@@ -891,14 +887,12 @@
       loadPartARound(currentPartARoundIdx);
     }
 
-    /* ================= 第二大題邏輯（10 抽 5 題） ================= */
     function startPartB() {
       const allQ = [...activePartBData.questions];
       partBPickedQuestions = allQ.sort(() => Math.random() - 0.5).slice(0, TOTAL_PART_B_QUESTIONS);
       currentPartBQuestionIdx = 0;
       partBScore = 0;
 
-      // 初始化長音檔物件
       currentPartBAudio = new Audio(activePartBData.audioFile);
 
       navigateTo('view-quiz-partB');
@@ -924,11 +918,9 @@
         container.appendChild(btn);
       });
 
-      // 自動播一次該題題目音檔
       playPartBCurrentAudio();
     }
 
-    // 依精準時間標籤播放長音檔片段
     function playPartBCurrentAudio() {
       const q = partBPickedQuestions[currentPartBQuestionIdx];
       stopCurrentAudio();
@@ -959,7 +951,6 @@
       });
     }
 
-    // 點擊選項作答
     function selectPartBOption(selectedLabel, correctLabel, clickedBtn) {
       stopCurrentAudio();
 
@@ -993,7 +984,7 @@
     }
 
     function finishAllQuizzes() {
-      alert(`🎉 恭喜完成所有練習！\n第二大題答對題數：${partBScore} / ${TOTAL_PART_B_QUESTIONS}`);
+      alert(`🎉 恭喜完成 ${currentSectionTitle} 所有練習！\n第二大題答對題數：${partBScore} / ${TOTAL_PART_B_QUESTIONS}`);
       navigateTo('view-topics');
     }
   </script>
