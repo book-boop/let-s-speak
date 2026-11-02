@@ -71,15 +71,15 @@ const book1_U6_U10_Data = [
 const book1_PartB_U6_U10_Data = {
   audioFile: "audio/test2_track05.mp3",
   questions: [
-    { id: 1, script: "Whose gloves are these?", start: 3.10, end: 5.18, options: [{ label: "A", text: "They’re my brother’s." }, { label: "B", text: "It’s not mine." }, { label: "C", text: "It’s Lisa’s." }], answer: "A" },
-    { id: 2, script: "Where is my money?", start: 11.20, end: 12.98, options: [{ label: "A", text: "Whose money is it?" }, { label: "B", text: "It’s mine." }, { label: "C", text: "It’s on the table." }], answer: "C" },
-    { id: 3, script: "What’s wrong?", start: 18.80, end: 20.28, options: [{ label: "A", text: "It’s yours." }, { label: "B", text: "I can’t find my bag." }, { label: "C", text: "Please wash the apples." }], answer: "B" },
-    { id: 4, script: "How can I help you?", start: 26.20, end: 27.98, options: [{ label: "A", text: "Please wash the apples." }, { label: "B", text: "Please help me." }, { label: "C", text: "Yes, please help me." }], answer: "A" },
-    { id: 5, script: "Please mix the flour and milk for me.", start: 33.90, end: 37.42, options: [{ label: "A", text: "No problem." }, { label: "B", text: "See you." }, { label: "C", text: "Wonderful." }], answer: "A" },
-    { id: 6, script: "Hi, Allen. What do you do after school?", start: 43.70, end: 47.76, options: [{ label: "A", text: "Let’s read books at home." }, { label: "B", text: "It’s sunny and hot." }, { label: "C", text: "I usually read books." }], answer: "C" },
-    { id: 7, script: "Is he playing the piano?", start: 53.95, end: 56.48, options: [{ label: "A", text: "No, he isn’t dancing." }, { label: "B", text: "Yes, he is." }, { label: "C", text: "Yes, he’s playing games." }], answer: "B" },
-    { id: 8, script: "Where is my flute?", start: 62.60, end: 64.50, options: [{ label: "A", text: "My flute is not on the table." }, { label: "B", text: "It’s on the sofa." }, { label: "C", text: "Where is it?" }], answer: "B" },
-    { id: 9, script: "I’m making cupcakes. Can you help me?", start: 70.95, end: 74.20, options: [{ label: "A", text: "Sure!" }, { label: "B", text: "Well done." }, { label: "C", text: "Try again." }], answer: "A" },
-    { id: 10, script: "Can you play any instruments?", start: 80.65, end: 83.20, options: [{ label: "A", text: "Sounds awesome." }, { label: "B", text: "How about you?" }, { label: "C", text: "Yes, I can play the drums." }], answer: "C" }
+    { id: 1, script: "Whose gloves are these?", start: 2.70, end: 5.26, options: [{ label: "A", text: "They’re my brother’s." }, { label: "B", text: "It’s not mine." }, { label: "C", text: "It’s Lisa’s." }], answer: "A" },
+    { id: 2, script: "Where is my money?", start: 11.28, end: 13.03, options: [{ label: "A", text: "Whose money is it?" }, { label: "B", text: "It’s mine." }, { label: "C", text: "It’s on the table." }], answer: "C" },
+    { id: 3, script: "What’s wrong?", start: 18.87, end: 20.33, options: [{ label: "A", text: "It’s yours." }, { label: "B", text: "I can’t find my bag." }, { label: "C", text: "Please wash the apples." }], answer: "B" },
+    { id: 4, script: "How can I help you?", start: 26.27, end: 28.04, options: [{ label: "A", text: "Please wash the apples." }, { label: "B", text: "Please help me." }, { label: "C", text: "Yes, please help me." }], answer: "A" },
+    { id: 5, script: "Please mix the flour and milk for me.", start: 34.00, end: 37.61, options: [{ label: "A", text: "No problem." }, { label: "B", text: "See you." }, { label: "C", text: "Wonderful." }], answer: "A" },
+    { id: 6, script: "Hi, Allen. What do you do after school?", start: 43.78, end: 47.82, options: [{ label: "A", text: "Let’s read books at home." }, { label: "B", text: "It’s sunny and hot." }, { label: "C", text: "I usually read books." }], answer: "C" },
+    { id: 7, script: "Is he playing the piano?", start: 54.02, end: 56.55, options: [{ label: "A", text: "No, he isn’t dancing." }, { label: "B", text: "Yes, he is." }, { label: "C", text: "Yes, he’s playing games." }], answer: "B" },
+    { id: 8, script: "Where is my flute?", start: 62.68, end: 64.57, options: [{ label: "A", text: "My flute is not on the table." }, { label: "B", text: "It’s on the sofa." }, { label: "C", text: "Where is it?" }], answer: "B" },
+    { id: 9, script: "I’m making cupcakes. Can you help me?", start: 71.05, end: 74.29, options: [{ label: "A", text: "Sure!" }, { label: "B", text: "Well done." }, { label: "C", text: "Try again." }], answer: "A" },
+    { id: 10, script: "Can you play any instruments?", start: 80.73, end: 83.37, options: [{ label: "A", text: "Sounds awesome." }, { label: "B", text: "How about you?" }, { label: "C", text: "Yes, I can play the drums." }], answer: "C" }
   ]
 };

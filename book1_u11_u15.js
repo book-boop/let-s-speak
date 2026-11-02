@@ -71,15 +71,15 @@ const book1_U11_U15_Data = [
 const book1_PartB_U11_U15_Data = {
   audioFile: "audio/test3_track08.mp3",
   questions: [
-    { id: 1, script: "How do you spell your name?", start: 2.60, end: 5.5, options: [{ label: "A", text: "I’m Ruby." }, { label: "B", text: "It’s J-E-N-N-Y." }, { label: "C", text: "It’s Lisa." }], answer: "B" },
-    { id: 2, script: "Hey there, I’m Allen. What’s your name?", start: 11.60, end: 15.6, options: [{ label: "A", text: "Hi, Allen. I’m Kelly!" }, { label: "B", text: "Nice to meet you." }, { label: "C", text: "Welcome to our school." }], answer: "A" },
-    { id: 3, script: "Eric, this is my mother.", start: 21.60, end: 23.9, options: [{ label: "A", text: "It’s E-R-I-C." }, { label: "B", text: "Hello, Mr. Smith." }, { label: "C", text: "Hi, nice to meet you, Mrs. Smith." }], answer: "C" },
-    { id: 4, script: "How old is your brother?", start: 30.15, end: 32.3, options: [{ label: "A", text: "He’s fifteen years old." }, { label: "B", text: "He has short hair." }, { label: "C", text: "He is tall." }], answer: "A" },
-    { id: 5, script: "Nice to meet you. Welcome to our school.", start: 38.15, end: 41.8, options: [{ label: "A", text: "How are you?" }, { label: "B", text: "See you." }, { label: "C", text: "It’s nice to meet you, too." }], answer: "C" },
-    { id: 6, script: "What’s the weather like today?", start: 47.85, end: 50.5, options: [{ label: "A", text: "Let’s read books at home." }, { label: "B", text: "It’s cool and cloudy." }, { label: "C", text: "See you later." }], answer: "B" },
-    { id: 7, script: "Is your mother wearing a yellow T-shirt?", start: 56.60, end: 60.1, options: [{ label: "A", text: "Yes, she is." }, { label: "B", text: "No, he isn’t." }, { label: "C", text: "Yes, she’s wearing a yellow cap." }], answer: "A" },
-    { id: 8, script: "What does your sister look like?", start: 66.00, end: 68.5, options: [{ label: "A", text: "She’s ten." }, { label: "B", text: "He’s handsome." }, { label: "C", text: "She’s tall." }], answer: "C" },
-    { id: 9, script: "How do you say “hi” in the afternoon?", start: 74.60, end: 78.6, options: [{ label: "A", text: "It’s “Good morning.”" }, { label: "B", text: "It’s “Good afternoon.”" }, { label: "C", text: "It’s “Good evening.”" }], answer: "B" },
-    { id: 10, script: "We can fly kites in the park today. What do you think?", start: 84.50, end: 89.4, options: [{ label: "A", text: "See you later." }, { label: "B", text: "Nice to meet you, too." }, { label: "C", text: "Sure! Let’s do it." }], answer: "C" }
+    { id: 1, script: "Do you like peaches?", start: 2.65, end: 4.85, options: [{ label: "A", text: "Yes, I like oranges." }, { label: "B", text: "Yes, I love them." }, { label: "C", text: "It’s not mine." }], answer: "B" },
+    { id: 2, script: "Do you like tomatoes?", start: 10.93, end: 12.95, options: [{ label: "A", text: "No, I’m not a fan." }, { label: "B", text: "It’s mine." }, { label: "C", text: "They’re on the table." }], answer: "A" },
+    { id: 3, script: "Which do you like better, strawberries or apples?", start: 19.02, end: 23.20, options: [{ label: "A", text: "I like bananas." }, { label: "B", text: "I don’t like grapes." }, { label: "C", text: "I prefer strawberries." }], answer: "C" },
+    { id: 4, script: "What’s your favorite vegetable?", start: 29.06, end: 31.57, options: [{ label: "A", text: "I love mushrooms." }, { label: "B", text: "I love apples." }, { label: "C", text: "I don’t like them." }], answer: "A" },
+    { id: 5, script: "How much is the glue?", start: 37.40, end: 39.57, options: [{ label: "A", text: "It’s 10 years old." }, { label: "B", text: "They’re 15 dollars." }, { label: "C", text: "It’s 30 dollars." }], answer: "C" },
+    { id: 6, script: "May I take your order?", start: 45.64, end: 47.33, options: [{ label: "A", text: "No, how about you?" }, { label: "B", text: "Anything else?" }, { label: "C", text: "Yes, I want a hamburger." }], answer: "C" },
+    { id: 7, script: "I want to have a sleepover at my house this weekend. Are you coming?", start: 53.42, end: 59.14, options: [{ label: "A", text: "Here you go." }, { label: "B", text: "Whose party is it?" }, { label: "C", text: "That sounds fun. Count me in!" }], answer: "C" },
+    { id: 8, script: "I want to bring my favorite video game to the party.", start: 65.14, end: 69.68, options: [{ label: "A", text: "Are you coming?" }, { label: "B", text: "Let’s go shopping." }, { label: "C", text: "Great idea." }], answer: "C" },
+    { id: 9, script: "How much are the scissors?", start: 75.94, end: 78.34, options: [{ label: "A", text: "They’re 60 dollars." }, { label: "B", text: "It’s 50 dollars." }, { label: "C", text: "Here you are." }], answer: "A" },
+    { id: 10, script: "Anything to drink?", start: 84.34, end: 86.02, options: [{ label: "A", text: "Yes, a large one." }, { label: "B", text: "An apple juice, please." }, { label: "C", text: "An apple pie, please." }], answer: "B" }
   ]
 };
