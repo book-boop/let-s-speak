@@ -101,6 +101,7 @@
       to { opacity: 1; transform: translateY(0); }
     }
 
+    /* 扉頁 */
     .books-row {
       display: flex;
       justify-content: center;
@@ -161,6 +162,7 @@
       color: #0f172a;
     }
 
+    /* 選單頁 */
     .topics-columns-container {
       width: 100%;
       max-width: 760px;
@@ -227,7 +229,7 @@
 
     .btn-back:hover { color: #0f172a; }
 
-    /* 第一大題樣式 */
+    /* 第一大題：單字排序 */
     .quiz-view-wrapper {
       width: 100%;
       max-width: 780px;
@@ -450,6 +452,10 @@
     .audio-play-big-btn:hover {
       background: #1d4ed8;
       transform: translateY(-2px);
+    }
+
+    .audio-play-big-btn:active {
+      transform: translateY(0);
     }
 
     .options-list {
@@ -689,7 +695,7 @@
     let currentPartBQuestionIdx = 0;
     let partBScore = 0;
 
-    // 微信與手機瀏覽器音訊解鎖
+    // 微信與手機瀏覽器音訊解鎖機制
     function setupAudioUnlock() {
       const doUnlock = () => {
         if (isAudioUnlocked) return;
@@ -744,7 +750,6 @@
       navigateTo('view-coming-soon');
     }
 
-    // 啟動測驗（以識別碼取值，防止變數未載入報錯）
     function startSectionQuiz(sectionKey, sectionTitle) {
       if (!isAudioUnlocked) {
         currentPartBAudio.play().then(() => currentPartBAudio.pause()).catch(() => {});
@@ -880,7 +885,7 @@
       document.getElementById('btn-to-partB').style.display = 'none';
     }
 
-   // ★★★ 徹底修復：只調用一次 play() 播放整段音訊，絕不被中途阻擋 ★★★
+    // 第一大題語音播放：單一完整長句合成串流
     function playCurrentRoundAudio() {
       const roundData = partAGeneratedRounds[currentPartARoundIdx];
       stopCurrentAudio();
@@ -897,15 +902,13 @@
       const isWeChat = ua.includes('micromessenger');
       const isLine = ua.includes('line');
 
-      // 1. 如果在微信或 LINE 內，直接使用單一完整音訊串流播放整句
       if (isWeChat || isLine || !('speechSynthesis' in window)) {
         playSingleAudioStream(fullText, btn);
         return;
       }
 
-      // 2. 一般瀏覽器優先使用原生語音合成
       try {
-        window.speechSynthesis.cancel(); // 喚醒
+        window.speechSynthesis.cancel();
 
         const utterance = new SpeechSynthesisUtterance(fullText);
         utterance.lang = 'en-US';
@@ -922,7 +925,6 @@
 
         window.speechSynthesis.speak(utterance);
 
-        // 防呆逾時保護
         setTimeout(() => {
           if (btn.innerHTML.includes('播放中')) {
             btn.innerHTML = `<span>🔊 播放音檔</span>`;
@@ -940,7 +942,6 @@
         currentOnlineTtsAudio = new Audio();
       }
 
-      // 使用公開完整句子 TTS 串流 API（支援長句與片語）
       const streamUrl = `https://api.streamelements.com/kappa/v2/speech?voice=en-US-Standard-C&text=${encodeURIComponent(text)}`;
 
       currentOnlineTtsAudio.src = streamUrl;
@@ -950,7 +951,6 @@
       };
 
       currentOnlineTtsAudio.onerror = () => {
-        // 備用長句發音伺服器
         const backupUrl = `https://translate.google.com/translate_tts?ie=UTF-8&q=${encodeURIComponent(text)}&tl=en&total=1&idx=0&client=tw-ob`;
         currentOnlineTtsAudio.src = backupUrl;
         currentOnlineTtsAudio.onended = () => {
