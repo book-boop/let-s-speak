@@ -227,6 +227,7 @@
 
     .btn-back:hover { color: #0f172a; }
 
+    /* 第一大題樣式 */
     .quiz-view-wrapper {
       width: 100%;
       max-width: 780px;
@@ -419,6 +420,7 @@
       min-height: 24px;
     }
 
+    /* 第二大題樣式 */
     .part-b-box {
       width: 100%;
       max-width: 620px;
@@ -448,6 +450,10 @@
     .audio-play-big-btn:hover {
       background: #1d4ed8;
       transform: translateY(-2px);
+    }
+
+    .audio-play-big-btn:active {
+      transform: translateY(0);
     }
 
     .options-list {
@@ -565,7 +571,7 @@
           <img src="images/book 3.png" alt="Let's Speak Book 3" onerror="this.src='https://placehold.co/240x350/ecfdf5/047857?text=Book+3'">
         </div>
       </div>
-      <button id="start-btn" class="btn-capsule" onclick="navigateTo('view-topics')">START</button>
+      <button id="start-btn" class="btn-capsule" onclick="onStartClicked()">START</button>
     </section>
 
     <!-- 2. 選單頁（9 大主題） -->
@@ -633,8 +639,9 @@
           <span id="partB-progress-badge" style="font-size: 0.85rem; color: #64748b; font-weight: 600;">第 1 / 5 題</span>
         </div>
 
-        <button class="audio-play-big-btn" onclick="playPartBCurrentAudio()">
-          <span>🔊 播放題目語音</span>
+        <!-- 點擊此按鈕手動觸發播放（相容 Android / LINE / 微信） -->
+        <button id="btn-play-partB" class="audio-play-big-btn" onclick="playPartBCurrentAudio()">
+          <span>🔊 點我播放題目語音</span>
         </button>
 
         <div class="options-list" id="options-container"></div>
@@ -660,7 +667,7 @@
 
   </main>
 
-  <!-- 引入題庫檔案（Book 1 完整範圍 + Book 2 U1-U5） -->
+  <!-- 引入題庫檔案 -->
   <script src="book1_u1_u5.js"></script>
   <script src="book1_u6_u10.js"></script>
   <script src="book1_u11_u15.js"></script>
@@ -671,8 +678,10 @@
     let activePartBData = null;
     let currentSectionTitle = '';
 
-    let currentPartBAudio = null;
+    // 全域共用 Audio 物件
+    let currentPartBAudio = new Audio();
     let audioTimeUpdateListener = null;
+    let isAudioUnlocked = false;
 
     const TOTAL_PART_A_ROUNDS = 3;
     const ITEMS_PER_ROUND = 6;
@@ -684,6 +693,28 @@
     let partBPickedQuestions = [];
     let currentPartBQuestionIdx = 0;
     let partBScore = 0;
+
+    // 解決 Android / LINE / 微信 禁止未互動播放的核心解鎖機制
+    function unlockAudio() {
+      if (isAudioUnlocked) return;
+      currentPartBAudio.play().then(() => {
+        currentPartBAudio.pause();
+        isAudioUnlocked = true;
+      }).catch(() => {
+        // 部分環境靜音解鎖
+        currentPartBAudio.muted = true;
+        currentPartBAudio.play().then(() => {
+          currentPartBAudio.pause();
+          currentPartBAudio.muted = false;
+          isAudioUnlocked = true;
+        }).catch(e => console.log('Audio unlock pending...'));
+      });
+    }
+
+    function onStartClicked() {
+      unlockAudio();
+      navigateTo('view-topics');
+    }
 
     function navigateTo(targetViewId) {
       stopCurrentAudio();
@@ -713,6 +744,7 @@
     }
 
     function startSectionQuiz(partAData, partBData, sectionTitle) {
+      unlockAudio();
       if (!partAData || !partBData) {
         alert('題庫尚未載入，請確認對應的題庫 js 檔案是否存在！');
         return;
@@ -721,10 +753,15 @@
       activePartBData = partBData;
       currentSectionTitle = sectionTitle;
 
+      // 預先指定並載入音訊檔案
+      currentPartBAudio.src = activePartBData.audioFile;
+      currentPartBAudio.load();
+
       initPartA();
       navigateTo('view-quiz-partA');
     }
 
+    /* ================= 第一大題邏輯 ================= */
     function initPartA() {
       let allItemsPool = [];
       activePartAData.forEach(unitData => {
@@ -831,6 +868,8 @@
         utterance.lang = 'en-US';
         utterance.rate = 0.88;
         window.speechSynthesis.speak(utterance);
+      } else {
+        alert('此手機瀏覽器環境未內建語音發音元件，建議使用 Chrome 或 Safari 開啟！');
       }
     }
 
@@ -878,13 +917,16 @@
       loadPartARound(currentPartARoundIdx);
     }
 
+    /* ================= 第二大題邏輯 ================= */
     function startPartB() {
+      unlockAudio();
       const allQ = [...activePartBData.questions];
       partBPickedQuestions = allQ.sort(() => Math.random() - 0.5).slice(0, TOTAL_PART_B_QUESTIONS);
       currentPartBQuestionIdx = 0;
       partBScore = 0;
 
-      currentPartBAudio = new Audio(activePartBData.audioFile);
+      currentPartBAudio.src = activePartBData.audioFile;
+      currentPartBAudio.load();
 
       navigateTo('view-quiz-partB');
       loadPartBQuestion(currentPartBQuestionIdx);
@@ -898,6 +940,9 @@
       document.getElementById('btn-next-partB').style.display = 'none';
       document.getElementById('btn-finish-all').style.display = 'none';
 
+      const playBtn = document.getElementById('btn-play-partB');
+      playBtn.innerHTML = `<span>🔊 播放題目語音</span>`;
+
       const container = document.getElementById('options-container');
       container.innerHTML = '';
 
@@ -909,41 +954,71 @@
         container.appendChild(btn);
       });
 
-      playPartBCurrentAudio();
+      // 移除自動播放，完全由使用者手動點擊「播放題目語音」按鈕觸發，100% 規避 Android 與 LINE 封鎖
     }
 
+    // 依精準時間播放片段（相容 Android / WebView）
     function playPartBCurrentAudio() {
       const q = partBPickedQuestions[currentPartBQuestionIdx];
       stopCurrentAudio();
 
-      if (!currentPartBAudio) {
-        currentPartBAudio = new Audio(activePartBData.audioFile);
+      const playBtn = document.getElementById('btn-play-partB');
+      playBtn.innerHTML = `<span>⏳ 播放中...</span>`;
+
+      // 確保音訊有來源
+      if (!currentPartBAudio.src || currentPartBAudio.src === '' || currentPartBAudio.src !== new URL(activePartBData.audioFile, window.location.href).href) {
+        currentPartBAudio.src = activePartBData.audioFile;
       }
 
-      currentPartBAudio.currentTime = q.start;
+      const executePlay = () => {
+        try {
+          currentPartBAudio.currentTime = q.start;
+        } catch (e) {
+          console.log("Seek error, waiting metadata:", e);
+        }
 
-      audioTimeUpdateListener = function() {
-        if (currentPartBAudio.currentTime >= q.end) {
-          currentPartBAudio.pause();
-          currentPartBAudio.removeEventListener('timeupdate', audioTimeUpdateListener);
-          audioTimeUpdateListener = null;
+        audioTimeUpdateListener = function() {
+          if (currentPartBAudio.currentTime >= q.end) {
+            currentPartBAudio.pause();
+            currentPartBAudio.removeEventListener('timeupdate', audioTimeUpdateListener);
+            audioTimeUpdateListener = null;
+            playBtn.innerHTML = `<span>🔊 再次播放題目</span>`;
+          }
+        };
+        currentPartBAudio.addEventListener('timeupdate', audioTimeUpdateListener);
+
+        const playPromise = currentPartBAudio.play();
+        if (playPromise !== undefined) {
+          playPromise.catch(err => {
+            console.log("Audio play failed:", err);
+            playBtn.innerHTML = `<span>🔊 播放題目語音</span>`;
+            // 若仍被攔截，使用 fallback 語音朗讀
+            if ('speechSynthesis' in window) {
+              window.speechSynthesis.cancel();
+              const utterance = new SpeechSynthesisUtterance(q.script);
+              utterance.lang = 'en-US';
+              utterance.rate = 0.9;
+              window.speechSynthesis.speak(utterance);
+            }
+          });
         }
       };
-      currentPartBAudio.addEventListener('timeupdate', audioTimeUpdateListener);
 
-      currentPartBAudio.play().catch(() => {
-        if ('speechSynthesis' in window) {
-          window.speechSynthesis.cancel();
-          const utterance = new SpeechSynthesisUtterance(q.script);
-          utterance.lang = 'en-US';
-          utterance.rate = 0.9;
-          window.speechSynthesis.speak(utterance);
-        }
-      });
+      // 若尚未載入元資料，先等待其可播放
+      if (currentPartBAudio.readyState >= 2) {
+        executePlay();
+      } else {
+        currentPartBAudio.load();
+        currentPartBAudio.addEventListener('canplay', function onCanPlay() {
+          currentPartBAudio.removeEventListener('canplay', onCanPlay);
+          executePlay();
+        });
+      }
     }
 
     function selectPartBOption(selectedLabel, correctLabel, clickedBtn) {
       stopCurrentAudio();
+      document.getElementById('btn-play-partB').innerHTML = `<span>🔊 播放題目語音</span>`;
 
       document.querySelectorAll('.option-btn').forEach(btn => {
         btn.disabled = true;
