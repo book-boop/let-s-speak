@@ -452,10 +452,6 @@
       transform: translateY(-2px);
     }
 
-    .audio-play-big-btn:active {
-      transform: translateY(0);
-    }
-
     .options-list {
       width: 100%;
       display: flex;
@@ -574,20 +570,20 @@
       <button id="start-btn" class="btn-capsule" onclick="onStartClicked()">START</button>
     </section>
 
-    <!-- 2. 選單頁（9 大主題） -->
+    <!-- 2. 選單頁 -->
     <section id="view-topics" class="view-section">
       <div class="topics-columns-container">
         <!-- Book 1 -->
         <div class="book-column">
           <div class="column-title">Book 1</div>
-          <button class="unit-pill-btn book1" onclick="startSectionQuiz(book1_U1_U5_Data, book1_PartB_Data, 'Book 1 • U1~U5')">U1 - U5</button>
-          <button class="unit-pill-btn book1" onclick="startSectionQuiz(book1_U6_U10_Data, book1_PartB_U6_U10_Data, 'Book 1 • U6~U10')">U6 - U10</button>
-          <button class="unit-pill-btn book1" onclick="startSectionQuiz(book1_U11_U15_Data, book1_PartB_U11_U15_Data, 'Book 1 • U11~U15')">U11 - U15</button>
+          <button class="unit-pill-btn book1" onclick="startSectionQuiz('book1_u1_u5', 'Book 1 • U1~U5')">U1 - U5</button>
+          <button class="unit-pill-btn book1" onclick="startSectionQuiz('book1_u6_u10', 'Book 1 • U6~U10')">U6 - U10</button>
+          <button class="unit-pill-btn book1" onclick="startSectionQuiz('book1_u11_u15', 'Book 1 • U11~U15')">U11 - U15</button>
         </div>
         <!-- Book 2 -->
         <div class="book-column">
           <div class="column-title">Book 2</div>
-          <button class="unit-pill-btn book2" onclick="startSectionQuiz(book2_U1_U5_Data, book2_PartB_U1_U5_Data, 'Book 2 • U1~U5')">U1 - U5</button>
+          <button class="unit-pill-btn book2" onclick="startSectionQuiz('book2_u1_u5', 'Book 2 • U1~U5')">U1 - U5</button>
           <button class="unit-pill-btn book2" onclick="openComingSoon('Book 2', 'U6 - U10')">U6 - U10</button>
           <button class="unit-pill-btn book2" onclick="openComingSoon('Book 2', 'U11 - U15')">U11 - U15</button>
         </div>
@@ -631,7 +627,7 @@
       </div>
     </section>
 
-    <!-- 4. 第二大題：句子回應聽力選擇 (10 題抽 5 題) -->
+    <!-- 4. 第二大題：句子回應聽力選擇 -->
     <section id="view-quiz-partB" class="view-section">
       <div class="part-b-box">
         <div class="quiz-nav-row">
@@ -677,9 +673,8 @@
     let activePartBData = null;
     let currentSectionTitle = '';
 
-    // 全域共用 Audio 物件
     let currentPartBAudio = new Audio();
-    let currentOnlineTtsAudio = new Audio(); // 專門處理 Android / 微信 第一大題線上發音
+    let currentOnlineTtsAudio = new Audio();
     let audioTimeUpdateListener = null;
     let isAudioUnlocked = false;
 
@@ -694,19 +689,13 @@
     let currentPartBQuestionIdx = 0;
     let partBScore = 0;
 
-    // 微信與社群 WebView 專屬解鎖
-    function setupWeChatUnlock() {
+    // 微信與手機瀏覽器音訊解鎖
+    function setupAudioUnlock() {
       const doUnlock = () => {
         if (isAudioUnlocked) return;
-        currentPartBAudio.play().then(() => {
-          currentPartBAudio.pause();
-          isAudioUnlocked = true;
-        }).catch(() => {});
-        currentOnlineTtsAudio.play().then(() => {
-          currentOnlineTtsAudio.pause();
-        }).catch(() => {});
+        currentPartBAudio.play().then(() => { currentPartBAudio.pause(); isAudioUnlocked = true; }).catch(() => {});
+        currentOnlineTtsAudio.play().then(() => { currentOnlineTtsAudio.pause(); }).catch(() => {});
       };
-
       if (typeof WeixinJSBridge === 'object' && typeof WeixinJSBridge.invoke === 'function') {
         doUnlock();
       } else {
@@ -714,7 +703,7 @@
       }
       document.addEventListener('touchstart', doUnlock, { once: true });
     }
-    setupWeChatUnlock();
+    setupAudioUnlock();
 
     function onStartClicked() {
       if (!isAudioUnlocked) {
@@ -727,9 +716,7 @@
 
     function navigateTo(targetViewId) {
       stopCurrentAudio();
-      document.querySelectorAll('.view-section').forEach(view => {
-        view.classList.remove('active');
-      });
+      document.querySelectorAll('.view-section').forEach(view => view.classList.remove('active'));
       const targetView = document.getElementById(targetViewId);
       if (targetView) targetView.classList.add('active');
     }
@@ -744,6 +731,8 @@
       }
       if (currentOnlineTtsAudio) {
         currentOnlineTtsAudio.pause();
+        currentOnlineTtsAudio.onended = null;
+        currentOnlineTtsAudio.onerror = null;
       }
       if ('speechSynthesis' in window) {
         window.speechSynthesis.cancel();
@@ -755,13 +744,35 @@
       navigateTo('view-coming-soon');
     }
 
-    function startSectionQuiz(partAData, partBData, sectionTitle) {
-      if (!partAData || !partBData) {
-        alert('題庫尚未載入，請確認對應的題庫 js 檔案是否存在！');
+    // 啟動測驗（以識別碼取值，防止變數未載入報錯）
+    function startSectionQuiz(sectionKey, sectionTitle) {
+      if (!isAudioUnlocked) {
+        currentPartBAudio.play().then(() => currentPartBAudio.pause()).catch(() => {});
+        isAudioUnlocked = true;
+      }
+
+      let pA = null, pB = null;
+      if (sectionKey === 'book1_u1_u5') {
+        pA = typeof book1_U1_U5_Data !== 'undefined' ? book1_U1_U5_Data : null;
+        pB = typeof book1_PartB_Data !== 'undefined' ? book1_PartB_Data : null;
+      } else if (sectionKey === 'book1_u6_u10') {
+        pA = typeof book1_U6_U10_Data !== 'undefined' ? book1_U6_U10_Data : null;
+        pB = typeof book1_PartB_U6_U10_Data !== 'undefined' ? book1_PartB_U6_U10_Data : null;
+      } else if (sectionKey === 'book1_u11_u15') {
+        pA = typeof book1_U11_U15_Data !== 'undefined' ? book1_U11_U15_Data : null;
+        pB = typeof book1_PartB_U11_U15_Data !== 'undefined' ? book1_PartB_U11_U15_Data : null;
+      } else if (sectionKey === 'book2_u1_u5') {
+        pA = typeof book2_U1_U5_Data !== 'undefined' ? book2_U1_U5_Data : null;
+        pB = typeof book2_PartB_U1_U5_Data !== 'undefined' ? book2_PartB_U1_U5_Data : null;
+      }
+
+      if (!pA || !pB) {
+        alert('題庫檔案載入失敗，請確認檔案已放置於同一目錄且檔名正確：' + sectionKey + '.js');
         return;
       }
-      activePartAData = partAData;
-      activePartBData = partBData;
+
+      activePartAData = pA;
+      activePartBData = pB;
       currentSectionTitle = sectionTitle;
 
       currentPartBAudio.src = activePartBData.audioFile;
@@ -869,54 +880,65 @@
       document.getElementById('btn-to-partB').style.display = 'none';
     }
 
-    // ★★★ 雙引擎語音播放：解決 Android 微信/LINE 第一大題沒聲音的問題 ★★★
+    // ★★★ 強化發音引擎：支援片語與多詞句子，解決只唸 3 個單詞問題 ★★★
     function playCurrentRoundAudio() {
       const roundData = partAGeneratedRounds[currentPartARoundIdx];
-      const audioBtn = document.getElementById('btn-play-partA');
       stopCurrentAudio();
 
-      const ua = navigator.userAgent.toLowerCase();
-      const isWeChatOrLine = ua.includes('micromessenger') || ua.includes('line');
-      const isAndroid = ua.includes('android');
+      const btn = document.getElementById('btn-play-partA');
+      btn.innerHTML = `<span>⏳ 播放中...</span>`;
 
-      // 依序排列的單字字串
-      const speechSentence = roundData.correctOrderWords.map((w, idx) => `Number ${idx + 1}. ${w}`).join('. ');
+      // 檢查是否能正常使用原生合成
+      const canUseSpeech = ('speechSynthesis' in window) && !navigator.userAgent.toLowerCase().includes('micromessenger');
 
-      // 如果是 Android 或 微信/LINE，直接調用線上高相容 MP3 音訊串流
-      if (isAndroid || isWeChatOrLine || !('speechSynthesis' in window)) {
-        playOnlineAudioSentence(roundData.correctOrderWords);
-      } else {
-        // iOS Safari / 電腦端優先使用原生清晰合成
+      if (canUseSpeech) {
         try {
+          const speechSentence = roundData.correctOrderWords.map((w, idx) => `Number ${idx + 1}. ${w}`).join('. ');
           const utterance = new SpeechSynthesisUtterance(speechSentence);
           utterance.lang = 'en-US';
           utterance.rate = 0.85;
-          utterance.onerror = () => playOnlineAudioSentence(roundData.correctOrderWords);
+          utterance.onend = () => { btn.innerHTML = `<span>🔊 播放音檔</span>`; };
+          utterance.onerror = () => { playOnlinePhraseSequence(roundData.correctOrderWords, btn); };
           window.speechSynthesis.speak(utterance);
         } catch (e) {
-          playOnlineAudioSentence(roundData.correctOrderWords);
+          playOnlinePhraseSequence(roundData.correctOrderWords, btn);
         }
+      } else {
+        playOnlinePhraseSequence(roundData.correctOrderWords, btn);
       }
     }
 
-    // 線上真人 MP3 發音串接（保證在 Android 微信 100% 能響）
-    function playOnlineAudioSentence(wordsArray) {
-      let step = 0;
-      function playNextItem() {
-        if (step >= wordsArray.length) return;
-        const currentWord = wordsArray[step];
-        const num = step + 1;
-        step++;
+    // 高相容性片語發音模組（支援長片語，不會因空白鍵中斷）
+    function playOnlinePhraseSequence(wordsArray, btn) {
+      let idx = 0;
+      function next() {
+        if (idx >= wordsArray.length) {
+          if (btn) btn.innerHTML = `<span>🔊 播放音檔</span>`;
+          return;
+        }
+        const text = wordsArray[idx];
+        idx++;
 
-        // 呼叫線上標準美語發音庫
-        const audioUrl = `https://dict.youdao.com/dictvoice?audio=${encodeURIComponent(currentWord)}&type=2`;
-        currentOnlineTtsAudio.src = audioUrl;
-        currentOnlineTtsAudio.play().catch(() => {});
-        currentOnlineTtsAudio.onended = () => {
-          setTimeout(playNextItem, 700); // 每個單字之間停頓 0.7 秒
+        // 使用支援長詞/片語的 Google TTS 串流 API
+        const encoded = encodeURIComponent(text);
+        const url = `https://translate.google.com/translate_tts?ie=UTF-8&q=${encoded}&tl=en&client=tw-ob`;
+
+        currentOnlineTtsAudio.src = url;
+        currentOnlineTtsAudio.onended = () => { setTimeout(next, 650); };
+        currentOnlineTtsAudio.onerror = () => {
+          // 如果 Google TTS 受阻，自動降級使用詞典 API
+          const fallbackUrl = `https://dict.youdao.com/dictvoice?audio=${encoded}&type=2`;
+          currentOnlineTtsAudio.src = fallbackUrl;
+          currentOnlineTtsAudio.onended = () => { setTimeout(next, 650); };
+          currentOnlineTtsAudio.onerror = () => { setTimeout(next, 300); }; // 避免卡死直接跳下一題
+          currentOnlineTtsAudio.play().catch(() => { setTimeout(next, 300); });
         };
+
+        currentOnlineTtsAudio.play().catch(() => {
+          setTimeout(next, 400);
+        });
       }
-      playNextItem();
+      next();
     }
 
     function submitPartAAnswer() {
@@ -1000,27 +1022,19 @@
       });
     }
 
-   // 依精準時間段播放長音檔（徹底修復無法發聲與載入卡死問題）
     function playPartBCurrentAudio() {
       const q = partBPickedQuestions[currentPartBQuestionIdx];
       stopCurrentAudio();
 
       const playBtn = document.getElementById('btn-play-partB');
-      playBtn.innerHTML = `<span>⏳ 載入播放中...</span>`;
+      playBtn.innerHTML = `<span>⏳ 播放中...</span>`;
 
-      // 1. 確保音訊實例正常，設定路徑
-      if (!currentPartBAudio) {
-        currentPartBAudio = new Audio();
-      }
-
-      // 如果路徑不同才重新指定 src，避免重複載入
       const targetSrc = activePartBData.audioFile;
       if (!currentPartBAudio.src.endsWith(encodeURI(targetSrc)) && !currentPartBAudio.src.endsWith(targetSrc)) {
         currentPartBAudio.src = targetSrc;
         currentPartBAudio.load();
       }
 
-      // 2. 核心播放與秒數區間監聽
       const doPlaySegment = () => {
         try {
           currentPartBAudio.currentTime = q.start;
@@ -1028,15 +1042,12 @@
           console.warn("Seek error:", e);
         }
 
-        // 移除舊的監聽
         if (audioTimeUpdateListener) {
           currentPartBAudio.removeEventListener('timeupdate', audioTimeUpdateListener);
           audioTimeUpdateListener = null;
         }
 
-        // 監聽播放秒數，到達該題結束點立即暫停
         audioTimeUpdateListener = function() {
-          // 確保播放時間確實已經超過起始時間且達到結束時間才暫停
           if (currentPartBAudio.currentTime >= q.end && currentPartBAudio.currentTime > q.start) {
             currentPartBAudio.pause();
             currentPartBAudio.removeEventListener('timeupdate', audioTimeUpdateListener);
@@ -1051,17 +1062,15 @@
           playPromise.then(() => {
             playBtn.innerHTML = `<span>🔊 播放中...</span>`;
           }).catch(err => {
-            console.error("播放失敗，嘗試備援發音:", err);
-            fallbackPlaySpeech(q.script, playBtn);
+            console.error("播放失敗:", err);
+            playBtn.innerHTML = `<span>🔊 播放題目語音</span>`;
           });
         }
       };
 
-      // 3. 判斷音訊就緒狀態
-      if (currentPartBAudio.readyState >= 1) { // HAVE_METADATA 以上即可 seek
+      if (currentPartBAudio.readyState >= 1) {
         doPlaySegment();
       } else {
-        // 如果尚未載入，監聽 loadedmetadata 或 canplay
         const onReady = () => {
           currentPartBAudio.removeEventListener('loadedmetadata', onReady);
           currentPartBAudio.removeEventListener('canplay', onReady);
@@ -1069,45 +1078,9 @@
         };
         currentPartBAudio.addEventListener('loadedmetadata', onReady, { once: true });
         currentPartBAudio.addEventListener('canplay', onReady, { once: true });
-        
-        // 逾時防卡死保護（超過 1.5 秒未就緒直接強制播放或調用備援）
-        setTimeout(() => {
-          if (currentPartBAudio.paused) {
-            doPlaySegment();
-          }
-        }, 1500);
+        setTimeout(() => { if (currentPartBAudio.paused) doPlaySegment(); }, 1200);
       }
     }
-
-    // 備援發音
-    function fallbackPlaySpeech(text, playBtn) {
-      if ('speechSynthesis' in window) {
-        window.speechSynthesis.cancel();
-        const utterance = new SpeechSynthesisUtterance(text);
-        utterance.lang = 'en-US';
-        utterance.rate = 0.9;
-        utterance.onend = () => {
-          if (playBtn) playBtn.innerHTML = `<span>🔊 再次播放題目</span>`;
-        };
-        window.speechSynthesis.speak(utterance);
-      } else {
-        currentOnlineTtsAudio.src = `https://dict.youdao.com/dictvoice?audio=${encodeURIComponent(text)}&type=2`;
-        currentOnlineTtsAudio.play().catch(() => {});
-        currentOnlineTtsAudio.onended = () => {
-          if (playBtn) playBtn.innerHTML = `<span>🔊 再次播放題目</span>`;
-        };
-      }
-    }
-
-      if (currentPartBAudio.readyState >= 2) {
-        executePlay();
-      } else {
-        currentPartBAudio.load();
-        currentPartBAudio.addEventListener('canplay', function onCanPlay() {
-          currentPartBAudio.removeEventListener('canplay', onCanPlay);
-          executePlay();
-        });
-      }
 
     function selectPartBOption(selectedLabel, correctLabel, clickedBtn) {
       stopCurrentAudio();
