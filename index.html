@@ -101,6 +101,7 @@
       to { opacity: 1; transform: translateY(0); }
     }
 
+    /* 扉頁 */
     .books-row {
       display: flex;
       justify-content: center;
@@ -161,6 +162,7 @@
       color: #0f172a;
     }
 
+    /* 選單頁 */
     .topics-columns-container {
       width: 100%;
       max-width: 760px;
@@ -227,6 +229,7 @@
 
     .btn-back:hover { color: #0f172a; }
 
+    /* 第一大題：單字排序 */
     .quiz-view-wrapper {
       width: 100%;
       max-width: 780px;
@@ -419,6 +422,7 @@
       min-height: 24px;
     }
 
+    /* 第二大題樣式 */
     .part-b-box {
       width: 100%;
       max-width: 620px;
@@ -675,9 +679,10 @@
     let activePartBData = null;
     let currentSectionTitle = '';
 
-    // 全域共用 Audio 物件
+    // 全域音訊與 Web Audio API 物件
+    let audioCtx = null;
+    let currentAudioSourceNode = null;
     let currentPartBAudio = new Audio();
-    let currentTtsAudio = new Audio();
     let audioTimeUpdateListener = null;
     let isAudioUnlocked = false;
 
@@ -692,11 +697,24 @@
     let currentPartBQuestionIdx = 0;
     let partBScore = 0;
 
-    // 微信與手機專屬手勢音訊解鎖機制
+    function getAudioContext() {
+      if (!audioCtx) {
+        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      }
+      if (audioCtx.state === 'suspended') {
+        audioCtx.resume();
+      }
+      return audioCtx;
+    }
+
+    // 手勢觸發解鎖機制
     function triggerUnlockAudio() {
       if (isAudioUnlocked) return;
+      const ctx = getAudioContext();
+      if (ctx.state === 'suspended') {
+        ctx.resume();
+      }
       currentPartBAudio.play().then(() => { currentPartBAudio.pause(); }).catch(() => {});
-      currentTtsAudio.play().then(() => { currentTtsAudio.pause(); }).catch(() => {});
       isAudioUnlocked = true;
     }
 
@@ -720,17 +738,19 @@
     }
 
     function stopCurrentAudio() {
+      if (currentAudioSourceNode) {
+        try {
+          currentAudioSourceNode.stop();
+          currentAudioSourceNode.disconnect();
+        } catch(e) {}
+        currentAudioSourceNode = null;
+      }
       if (currentPartBAudio) {
         currentPartBAudio.pause();
         if (audioTimeUpdateListener) {
           currentPartBAudio.removeEventListener('timeupdate', audioTimeUpdateListener);
           audioTimeUpdateListener = null;
         }
-      }
-      if (currentTtsAudio) {
-        currentTtsAudio.pause();
-        currentTtsAudio.onended = null;
-        currentTtsAudio.onerror = null;
       }
       if ('speechSynthesis' in window) {
         window.speechSynthesis.cancel();
@@ -874,89 +894,113 @@
       document.getElementById('btn-to-partB').style.display = 'none';
     }
 
-    // 第一大題發音：優先原生語音，社群/Android 採用片語安全隊列發音
+    // 第一大題：長片語與多單字無縫發音整合
     function playCurrentRoundAudio() {
       const roundData = partAGeneratedRounds[currentPartARoundIdx];
       stopCurrentAudio();
 
       const btn = document.getElementById('btn-play-partA');
-      btn.innerHTML = `<span>⏳ 播放中...</span>`;
+      btn.innerHTML = `<span>⏳ 發音準備中...</span>`;
 
-      const ua = navigator.userAgent.toLowerCase();
-      const isWeChat = ua.includes('micromessenger');
-      const isLine = ua.includes('line');
+      const isWeChat = navigator.userAgent.toLowerCase().includes('micromessenger');
+      const isLine = navigator.userAgent.toLowerCase().includes('line');
 
-      if (isWeChat || isLine || !('speechSynthesis' in window)) {
-        playPhraseSafeQueue(roundData.correctOrderWords, btn);
-        return;
+      // 非微信/LINE 且支援 SpeechSynthesis 時優先使用
+      if (!isWeChat && !isLine && ('speechSynthesis' in window)) {
+        try {
+          window.speechSynthesis.cancel();
+          const speechSentence = roundData.correctOrderWords
+            .map((w, idx) => `Number ${idx + 1}, ${w}`)
+            .join('. ');
+
+          const utterance = new SpeechSynthesisUtterance(speechSentence);
+          utterance.lang = 'en-US';
+          utterance.rate = 0.86;
+          utterance.onend = () => { btn.innerHTML = `<span>🔊 播放音檔</span>`; };
+          utterance.onerror = () => { playConcatAudioViaWebAudio(roundData.correctOrderWords, btn); };
+          window.speechSynthesis.speak(utterance);
+          return;
+        } catch (e) {
+          // 異常自動降級走 Web Audio API 拼接
+        }
       }
 
-      // iOS Safari 或一般 Chrome 瀏覽器優先使用原生合成
-      try {
-        window.speechSynthesis.cancel();
-
-        const fullSpeech = roundData.correctOrderWords
-          .map((w, idx) => `Number ${idx + 1}, ${w}`)
-          .join('. ');
-
-        const utterance = new SpeechSynthesisUtterance(fullSpeech);
-        utterance.lang = 'en-US';
-        utterance.rate = 0.86;
-
-        utterance.onend = () => {
-          btn.innerHTML = `<span>🔊 播放音檔</span>`;
-        };
-
-        utterance.onerror = () => {
-          playPhraseSafeQueue(roundData.correctOrderWords, btn);
-        };
-
-        window.speechSynthesis.speak(utterance);
-
-        setTimeout(() => {
-          if (btn.innerHTML.includes('播放中')) {
-            btn.innerHTML = `<span>🔊 播放音檔</span>`;
-          }
-        }, 14000);
-
-      } catch (err) {
-        playPhraseSafeQueue(roundData.correctOrderWords, btn);
-      }
+      // Android、微信、LINE 或長片語環境：啟用 Web Audio API 記憶體拼接播放
+      playConcatAudioViaWebAudio(roundData.correctOrderWords, btn);
     }
 
-    // 片語安全隊列發音（將片語中的空白轉為 +，使詞典 API 能完整發出長片語）
-    function playPhraseSafeQueue(wordsArray, btn) {
-      let idx = 0;
+    // Web Audio API 音訊無縫串接核心：將片語拆單字載入後在記憶體拼接成單一音軌播放
+    async function playConcatAudioViaWebAudio(wordsArray, btn) {
+      const ctx = getAudioContext();
 
-      function playNextItem() {
-        if (idx >= wordsArray.length) {
+      // 展開為單詞清單（包含序號）
+      let tokens = [];
+      wordsArray.forEach((phrase, idx) => {
+        tokens.push('Number');
+        tokens.push(String(idx + 1));
+        const subWords = phrase.trim().split(/\s+/);
+        subWords.forEach(w => tokens.push(w));
+      });
+
+      try {
+        const bufferPromises = tokens.map(async (token) => {
+          const cleanWord = token.replace(/[^a-zA-Z0-9]/g, '');
+          const url = `https://dict.youdao.com/dictvoice?audio=${encodeURIComponent(cleanWord)}&type=2`;
+          try {
+            const res = await fetch(url);
+            const arrayBuf = await res.arrayBuffer();
+            return await ctx.decodeAudioData(arrayBuf);
+          } catch (e) {
+            return null;
+          }
+        });
+
+        const audioBuffers = await Promise.all(bufferPromises);
+        const validBuffers = audioBuffers.filter(b => b !== null);
+
+        if (validBuffers.length === 0) {
           if (btn) btn.innerHTML = `<span>🔊 播放音檔</span>`;
           return;
         }
 
-        const currentWord = wordsArray[idx];
-        idx++;
-
-        // 將片語內的空白轉換為 +，有道發音伺服器能完整回傳該片語發音
-        const formattedPhrase = currentWord.trim().replace(/\s+/g, '+');
-        const soundUrl = `https://dict.youdao.com/dictvoice?audio=${encodeURIComponent(formattedPhrase)}&type=2`;
-
-        currentTtsAudio.src = soundUrl;
-
-        currentTtsAudio.onended = () => {
-          setTimeout(playNextItem, 700); // 單字/片語之間間隔 0.7 秒
-        };
-
-        currentTtsAudio.onerror = () => {
-          setTimeout(playNextItem, 250); // 若遇網路異常自動跳下一題，不卡死
-        };
-
-        currentTtsAudio.play().catch(() => {
-          setTimeout(playNextItem, 250);
+        const sampleRate = ctx.sampleRate;
+        const pauseSamples = Math.floor(sampleRate * 0.18);
+        let totalLength = 0;
+        validBuffers.forEach(buf => {
+          totalLength += buf.length + pauseSamples;
         });
-      }
 
-      playNextItem();
+        const concatBuffer = ctx.createBuffer(1, totalLength, sampleRate);
+        const channelData = concatBuffer.getChannelData(0);
+
+        let offset = 0;
+        validBuffers.forEach(buf => {
+          const sourceData = buf.getChannelData(0);
+          channelData.set(sourceData, offset);
+          offset += buf.length + pauseSamples;
+        });
+
+        if (currentAudioSourceNode) {
+          try { currentAudioSourceNode.stop(); } catch(e) {}
+        }
+
+        const source = ctx.createBufferSource();
+        source.buffer = concatBuffer;
+        source.connect(ctx.destination);
+        currentAudioSourceNode = source;
+
+        btn.innerHTML = `<span>🔊 播放中...</span>`;
+
+        source.onended = () => {
+          btn.innerHTML = `<span>🔊 播放音檔</span>`;
+        };
+
+        source.start(0);
+
+      } catch (err) {
+        console.warn("Web Audio 拼接播放失敗:", err);
+        if (btn) btn.innerHTML = `<span>🔊 播放音檔</span>`;
+      }
     }
 
     function submitPartAAnswer() {
