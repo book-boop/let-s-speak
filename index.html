@@ -1000,27 +1000,44 @@
       });
     }
 
-    // 依精準時間段播放長音檔（支援 Android 微信）
+   // 依精準時間段播放長音檔（徹底修復無法發聲與載入卡死問題）
     function playPartBCurrentAudio() {
       const q = partBPickedQuestions[currentPartBQuestionIdx];
       stopCurrentAudio();
 
       const playBtn = document.getElementById('btn-play-partB');
-      playBtn.innerHTML = `<span>⏳ 播放中...</span>`;
+      playBtn.innerHTML = `<span>⏳ 載入播放中...</span>`;
 
-      if (!currentPartBAudio.src || currentPartBAudio.src === '' || currentPartBAudio.src !== new URL(activePartBData.audioFile, window.location.href).href) {
-        currentPartBAudio.src = activePartBData.audioFile;
+      // 1. 確保音訊實例正常，設定路徑
+      if (!currentPartBAudio) {
+        currentPartBAudio = new Audio();
       }
 
-      const executePlay = () => {
+      // 如果路徑不同才重新指定 src，避免重複載入
+      const targetSrc = activePartBData.audioFile;
+      if (!currentPartBAudio.src.endsWith(encodeURI(targetSrc)) && !currentPartBAudio.src.endsWith(targetSrc)) {
+        currentPartBAudio.src = targetSrc;
+        currentPartBAudio.load();
+      }
+
+      // 2. 核心播放與秒數區間監聽
+      const doPlaySegment = () => {
         try {
           currentPartBAudio.currentTime = q.start;
         } catch (e) {
-          console.log("Seek error:", e);
+          console.warn("Seek error:", e);
         }
 
+        // 移除舊的監聽
+        if (audioTimeUpdateListener) {
+          currentPartBAudio.removeEventListener('timeupdate', audioTimeUpdateListener);
+          audioTimeUpdateListener = null;
+        }
+
+        // 監聽播放秒數，到達該題結束點立即暫停
         audioTimeUpdateListener = function() {
-          if (currentPartBAudio.currentTime >= q.end) {
+          // 確保播放時間確實已經超過起始時間且達到結束時間才暫停
+          if (currentPartBAudio.currentTime >= q.end && currentPartBAudio.currentTime > q.start) {
             currentPartBAudio.pause();
             currentPartBAudio.removeEventListener('timeupdate', audioTimeUpdateListener);
             audioTimeUpdateListener = null;
@@ -1031,17 +1048,56 @@
 
         const playPromise = currentPartBAudio.play();
         if (playPromise !== undefined) {
-          playPromise.catch(err => {
-            console.log("Play failed, switching to online TTS:", err);
-            // 若音檔被封鎖，使用線上字典發音作為備援
-            currentOnlineTtsAudio.src = `https://dict.youdao.com/dictvoice?audio=${encodeURIComponent(q.script)}&type=2`;
-            currentOnlineTtsAudio.play().catch(() => {});
-            currentOnlineTtsAudio.onended = () => {
-              playBtn.innerHTML = `<span>🔊 再次播放題目</span>`;
-            };
+          playPromise.then(() => {
+            playBtn.innerHTML = `<span>🔊 播放中...</span>`;
+          }).catch(err => {
+            console.error("播放失敗，嘗試備援發音:", err);
+            fallbackPlaySpeech(q.script, playBtn);
           });
         }
       };
+
+      // 3. 判斷音訊就緒狀態
+      if (currentPartBAudio.readyState >= 1) { // HAVE_METADATA 以上即可 seek
+        doPlaySegment();
+      } else {
+        // 如果尚未載入，監聽 loadedmetadata 或 canplay
+        const onReady = () => {
+          currentPartBAudio.removeEventListener('loadedmetadata', onReady);
+          currentPartBAudio.removeEventListener('canplay', onReady);
+          doPlaySegment();
+        };
+        currentPartBAudio.addEventListener('loadedmetadata', onReady, { once: true });
+        currentPartBAudio.addEventListener('canplay', onReady, { once: true });
+        
+        // 逾時防卡死保護（超過 1.5 秒未就緒直接強制播放或調用備援）
+        setTimeout(() => {
+          if (currentPartBAudio.paused) {
+            doPlaySegment();
+          }
+        }, 1500);
+      }
+    }
+
+    // 備援發音
+    function fallbackPlaySpeech(text, playBtn) {
+      if ('speechSynthesis' in window) {
+        window.speechSynthesis.cancel();
+        const utterance = new SpeechSynthesisUtterance(text);
+        utterance.lang = 'en-US';
+        utterance.rate = 0.9;
+        utterance.onend = () => {
+          if (playBtn) playBtn.innerHTML = `<span>🔊 再次播放題目</span>`;
+        };
+        window.speechSynthesis.speak(utterance);
+      } else {
+        currentOnlineTtsAudio.src = `https://dict.youdao.com/dictvoice?audio=${encodeURIComponent(text)}&type=2`;
+        currentOnlineTtsAudio.play().catch(() => {});
+        currentOnlineTtsAudio.onended = () => {
+          if (playBtn) playBtn.innerHTML = `<span>🔊 再次播放題目</span>`;
+        };
+      }
+    }
 
       if (currentPartBAudio.readyState >= 2) {
         executePlay();
@@ -1052,7 +1108,6 @@
           executePlay();
         });
       }
-    }
 
     function selectPartBOption(selectedLabel, correctLabel, clickedBtn) {
       stopCurrentAudio();
