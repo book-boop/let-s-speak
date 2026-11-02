@@ -101,7 +101,6 @@
       to { opacity: 1; transform: translateY(0); }
     }
 
-    /* 扉頁 */
     .books-row {
       display: flex;
       justify-content: center;
@@ -162,7 +161,6 @@
       color: #0f172a;
     }
 
-    /* 9 大主題選單 */
     .topics-columns-container {
       width: 100%;
       max-width: 760px;
@@ -229,7 +227,6 @@
 
     .btn-back:hover { color: #0f172a; }
 
-    /* 第一大題：單字排序 */
     .quiz-view-wrapper {
       width: 100%;
       max-width: 780px;
@@ -422,7 +419,6 @@
       min-height: 24px;
     }
 
-    /* 第二大題：句子回應聽力選擇 */
     .part-b-box {
       width: 100%;
       max-width: 620px;
@@ -585,7 +581,7 @@
         <!-- Book 2 -->
         <div class="book-column">
           <div class="column-title">Book 2</div>
-          <button class="unit-pill-btn book2" onclick="openComingSoon('Book 2', 'U1 - U5')">U1 - U5</button>
+          <button class="unit-pill-btn book2" onclick="startSectionQuiz(book2_U1_U5_Data, book2_PartB_U1_U5_Data, 'Book 2 • U1~U5')">U1 - U5</button>
           <button class="unit-pill-btn book2" onclick="openComingSoon('Book 2', 'U6 - U10')">U6 - U10</button>
           <button class="unit-pill-btn book2" onclick="openComingSoon('Book 2', 'U11 - U15')">U11 - U15</button>
         </div>
@@ -664,10 +660,11 @@
 
   </main>
 
-  <!-- 引入獨立題庫檔（Book 1 完整三範圍） -->
+  <!-- 引入題庫檔案（Book 1 完整範圍 + Book 2 U1-U5） -->
   <script src="book1_u1_u5.js"></script>
   <script src="book1_u6_u10.js"></script>
   <script src="book1_u11_u15.js"></script>
+  <script src="book2_u1_u5.js"></script>
 
   <script>
     let activePartAData = null;
