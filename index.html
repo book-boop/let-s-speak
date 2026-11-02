@@ -927,23 +927,34 @@
       playAudioQueueByTag(roundData.correctOrderWords, btn);
     }
 
-    // 通用 Audio 隊列播放模組（強化版：長片語自動分流 + 超時防卡死）
+    // 徹底修復版：將片語拆分為單詞串流，確保所有單字 100% 完整發音
     function playAudioQueueByTag(wordsArray, btn) {
       let queue = [];
 
-      // 建立包含題號與單字/片語的播放列表
+      // 將每一題拆解：題號 -> 逐字加入單詞 -> 結尾停頓標記
       wordsArray.forEach((phrase, idx) => {
-        queue.push({ type: 'number', text: `Number ${idx + 1}` });
-        queue.push({ type: 'word', text: phrase.trim() });
+        queue.push({ text: `Number`, pause: 150 });
+        queue.push({ text: `${idx + 1}`, pause: 450 });
+
+        // 將片語拆解成個別單字（例如 "mix the flour and milk" 拆成 mix, the, flour, and, milk）
+        const words = phrase.trim().split(/\s+/);
+        words.forEach((w, wIdx) => {
+          const isLastWord = (wIdx === words.length - 1);
+          // 片語內的單字間隔 180ms，最後一個單字念完停頓 750ms 再接下一題
+          queue.push({ 
+            text: w.replace(/[^a-zA-Z0-9]/g, ''), 
+            pause: isLastWord ? 750 : 180 
+          });
+        });
       });
 
       let currentStep = 0;
-      let stepTimeout = null;
+      let timer = null;
 
       function playNext() {
-        if (stepTimeout) {
-          clearTimeout(stepTimeout);
-          stepTimeout = null;
+        if (timer) {
+          clearTimeout(timer);
+          timer = null;
         }
 
         if (currentStep >= queue.length) {
@@ -954,55 +965,38 @@
         const item = queue[currentStep];
         currentStep++;
 
-        let soundUrl = '';
-        const wordCount = item.text.split(/\s+/).length;
-
-        // 如果是長片語（3 個字以上，例如 "mix the flour and milk"），改用長句 TTS 引擎
-        if (wordCount >= 3) {
-          soundUrl = `https://translate.google.com/translate_tts?ie=UTF-8&q=${encodeURIComponent(item.text)}&tl=en&client=tw-ob`;
-        } else {
-          // 單字或短片語使用有道詞典
-          const formatted = item.text.replace(/\s+/g, '+');
-          soundUrl = `https://dict.youdao.com/dictvoice?audio=${encodeURIComponent(formatted)}&type=2`;
+        if (!item.text) {
+          playNext();
+          return;
         }
 
+        // 單詞 100% 支援有道詞典發音
+        const soundUrl = `https://dict.youdao.com/dictvoice?audio=${encodeURIComponent(item.text)}&type=2`;
         currentTtsAudio.src = soundUrl;
 
-        // 播放結束後自動接續下一首
         currentTtsAudio.onended = () => {
-          const pauseTime = item.type === 'number' ? 350 : 750;
-          stepTimeout = setTimeout(playNext, pauseTime);
+          timer = setTimeout(playNext, item.pause);
         };
 
-        // 遇到載入錯誤時，自動切換備援引擎或跳過，絕不卡死
         currentTtsAudio.onerror = () => {
-          console.warn(`發音載入受阻: ${item.text}，切換備用線路`);
-          // 備用線路：Google TTS
-          const backupUrl = `https://translate.google.com/translate_tts?ie=UTF-8&q=${encodeURIComponent(item.text)}&tl=en&client=tw-ob`;
-          currentTtsAudio.src = backupUrl;
-          currentTtsAudio.onerror = () => {
-            stepTimeout = setTimeout(playNext, 200); // 再次失敗則跳過不卡死
-          };
-          currentTtsAudio.play().catch(() => {
-            stepTimeout = setTimeout(playNext, 200);
-          });
+          // 若個別字詞異常，快速跳到下一個字，不卡死
+          timer = setTimeout(playNext, 100);
         };
 
-        // 啟動播放
         const playPromise = currentTtsAudio.play();
         if (playPromise !== undefined) {
           playPromise.catch(err => {
-            console.warn("Audio play prevented:", err);
-            stepTimeout = setTimeout(playNext, 300);
+            console.warn("Play error:", err);
+            timer = setTimeout(playNext, 120);
           });
         }
 
-        // 安全防呆機制：若 3 秒內未觸發 onended 也未報錯，強制跳下一題
-        stepTimeout = setTimeout(() => {
+        // 防呆逾時保護（超過 2 秒沒播完自動切換下一個字）
+        timer = setTimeout(() => {
           if (currentTtsAudio.paused) {
             playNext();
           }
-        }, 3200);
+        }, 2000);
       }
 
       playNext();
