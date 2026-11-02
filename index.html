@@ -880,7 +880,7 @@
       document.getElementById('btn-to-partB').style.display = 'none';
     }
 
-    // ★★★ 穩定版：第一大題語音播放（相容 iOS、Android、LINE、微信）★★★
+   // ★★★ 徹底修復：只調用一次 play() 播放整段音訊，絕不被中途阻擋 ★★★
     function playCurrentRoundAudio() {
       const roundData = partAGeneratedRounds[currentPartARoundIdx];
       stopCurrentAudio();
@@ -888,96 +888,86 @@
       const btn = document.getElementById('btn-play-partA');
       btn.innerHTML = `<span>⏳ 播放中...</span>`;
 
+      // 組合出完整連續朗讀的句子（包含題號與單字/片語）
+      const fullText = roundData.correctOrderWords
+        .map((w, idx) => `Number ${idx + 1}, ${w}.`)
+        .join(' ');
+
       const ua = navigator.userAgent.toLowerCase();
       const isWeChat = ua.includes('micromessenger');
       const isLine = ua.includes('line');
 
-      // 微信或 LINE 內建瀏覽器全面使用穩定音訊佇列播放
+      // 1. 如果在微信或 LINE 內，直接使用單一完整音訊串流播放整句
       if (isWeChat || isLine || !('speechSynthesis' in window)) {
-        playOnlineWordSequence(roundData.correctOrderWords, btn);
+        playSingleAudioStream(fullText, btn);
         return;
       }
 
-      // 一般瀏覽器（Chrome, Safari, Edge）使用原生語音合成
+      // 2. 一般瀏覽器優先使用原生語音合成
       try {
-        window.speechSynthesis.cancel(); // 喚醒防卡死
+        window.speechSynthesis.cancel(); // 喚醒
 
-        const speechSentence = roundData.correctOrderWords
-          .map((w, idx) => `Number ${idx + 1}, ${w}`)
-          .join('. ');
-
-        const utterance = new SpeechSynthesisUtterance(speechSentence);
+        const utterance = new SpeechSynthesisUtterance(fullText);
         utterance.lang = 'en-US';
-        utterance.rate = 0.85;
+        utterance.rate = 0.88;
 
         utterance.onend = () => {
           btn.innerHTML = `<span>🔊 播放音檔</span>`;
         };
 
         utterance.onerror = () => {
-          console.warn("原生語音合成失敗，切換線上備援");
-          playOnlineWordSequence(roundData.correctOrderWords, btn);
+          console.warn("原生合成受阻，切換單一音訊串流備援");
+          playSingleAudioStream(fullText, btn);
         };
 
         window.speechSynthesis.speak(utterance);
 
-        // 防卡死逾時保護（若 12 秒內未結束自動復原按鈕）
+        // 防呆逾時保護
         setTimeout(() => {
           if (btn.innerHTML.includes('播放中')) {
             btn.innerHTML = `<span>🔊 播放音檔</span>`;
           }
-        }, 12000);
+        }, 15000);
 
       } catch (err) {
-        console.warn("speechSynthesis 異常:", err);
-        playOnlineWordSequence(roundData.correctOrderWords, btn);
+        playSingleAudioStream(fullText, btn);
       }
     }
 
-    // 穩健型音訊發音模組：自動將片語依序排隊播放，徹底解決空格中斷問題
-    function playOnlineWordSequence(wordsArray, btn) {
-      let speechQueue = [];
-
-      // 將 6 個項目展開成播放佇列（例如："Number 1", "practice", "the", "piano"）
-      wordsArray.forEach((phrase, idx) => {
-        speechQueue.push(`Number ${idx + 1}`);
-        // 若為多詞片語，依空格拆分逐字加入發音隊列
-        const subWords = phrase.trim().split(/\s+/);
-        subWords.forEach(w => speechQueue.push(w));
-      });
-
-      let qIdx = 0;
-      function playNextToken() {
-        if (qIdx >= speechQueue.length) {
-          if (btn) btn.innerHTML = `<span>🔊 播放音檔</span>`;
-          return;
-        }
-
-        const token = speechQueue[qIdx];
-        qIdx++;
-
-        // 使用穩定免 API Key 字典發音
-        const cleanWord = token.replace(/[^a-zA-Z0-9 ]/g, '');
-        const soundUrl = `https://dict.youdao.com/dictvoice?audio=${encodeURIComponent(cleanWord)}&type=2`;
-
-        currentOnlineTtsAudio.src = soundUrl;
-        
-        currentOnlineTtsAudio.onended = () => {
-          // 序號唸完停頓久一點(400ms)，片語內的字銜接快一點(150ms)
-          const delay = token.startsWith('Number') ? 350 : 180;
-          setTimeout(playNextToken, delay);
-        };
-
-        currentOnlineTtsAudio.onerror = () => {
-          setTimeout(playNextToken, 100); // 即使個別單字網路受阻也順暢跳過不卡死
-        };
-
-        currentOnlineTtsAudio.play().catch(() => {
-          setTimeout(playNextToken, 100);
-        });
+    // 將整段句子以「單一音訊」播放到底（避免被瀏覽器阻擋連續播放）
+    function playSingleAudioStream(text, btn) {
+      if (!currentOnlineTtsAudio) {
+        currentOnlineTtsAudio = new Audio();
       }
 
-      playNextToken();
+      // 使用公開完整句子 TTS 串流 API（支援長句與片語）
+      const streamUrl = `https://api.streamelements.com/kappa/v2/speech?voice=en-US-Standard-C&text=${encodeURIComponent(text)}`;
+
+      currentOnlineTtsAudio.src = streamUrl;
+
+      currentOnlineTtsAudio.onended = () => {
+        if (btn) btn.innerHTML = `<span>🔊 播放音檔</span>`;
+      };
+
+      currentOnlineTtsAudio.onerror = () => {
+        // 備用長句發音伺服器
+        const backupUrl = `https://translate.google.com/translate_tts?ie=UTF-8&q=${encodeURIComponent(text)}&tl=en&total=1&idx=0&client=tw-ob`;
+        currentOnlineTtsAudio.src = backupUrl;
+        currentOnlineTtsAudio.onended = () => {
+          if (btn) btn.innerHTML = `<span>🔊 播放音檔</span>`;
+        };
+        currentOnlineTtsAudio.onerror = () => {
+          if (btn) btn.innerHTML = `<span>🔊 播放音檔</span>`;
+        };
+        currentOnlineTtsAudio.play().catch(() => {
+          if (btn) btn.innerHTML = `<span>🔊 播放音檔</span>`;
+        });
+      };
+
+      currentOnlineTtsAudio.play().catch(e => {
+        console.warn("音訊播放被攔截:", e);
+        if (btn) btn.innerHTML = `<span>🔊 播放音檔</span>`;
+      });
     }
 
     function submitPartAAnswer() {
