@@ -3,71 +3,72 @@
  * 檔名: book1_u6_u10.js
  * ======================================================== */
 
-// 第一大題：單字聽力排序（30 個單字池，副檔名皆為 .png）
+// 第一大題：單字聽力排序（30 個單字池）
 const book1_U6_U10_Data = [
   {
     unit: "Unit 6",
-    title: "I Can Play the Piano",
+    title: "Whose Gloves Are These?",
     items: [
-      { id: "b1_u6_1", word: "piano", image: "images/b1_u6_piano.png" },
-      { id: "b1_u6_2", word: "guitar", image: "images/b1_u6_guitar.png" },
-      { id: "b1_u6_3", word: "violin", image: "images/b1_u6_violin.png" },
-      { id: "b1_u6_4", word: "drums", image: "images/b1_u6_drums.png" },
-      { id: "b1_u6_5", word: "keyboard", image: "images/b1_u6_keyboard.png" },
-      { id: "b1_u6_6", word: "flute", image: "images/b1_u6_flute.png" }
+      { id: "b1_u6_1", word: "gloves", image: "images/b1_u6_gloves.png" },
+      { id: "b1_u6_2", word: "scarf", image: "images/b1_u6_scarf.png" },
+      { id: "b1_u6_3", word: "glasses", image: "images/b1_u6_glasses.png" },
+      { id: "b1_u6_4", word: "sunglasses", image: "images/b1_u6_sunglasses.png" },
+      { id: "b1_u6_5", word: "umbrella", image: "images/b1_u6_umbrella.png" },
+      { id: "b1_u6_6", word: "raincoat", image: "images/b1_u6_raincoat.png" }
     ]
   },
   {
     unit: "Unit 7",
-    title: "What Do You Do After School?",
+    title: "I Usually Read Books",
     items: [
-      { id: "b1_u7_1", word: "practice the piano", image: "images/b1_u7_piano.png" },
-      { id: "b1_u7_2", word: "play games", image: "images/b1_u7_games.png" },
-      { id: "b1_u7_3", word: "play basketball", image: "images/b1_u7_basketball.png" },
-      { id: "b1_u7_4", word: "play soccer", image: "images/b1_u7_soccer.png" },
-      { id: "b1_u7_5", word: "read books", image: "images/b1_u7_books.png" },
-      { id: "b1_u7_6", word: "practice the violin", image: "images/b1_u7_violin.png" }
+      { id: "b1_u7_1", word: "read books", image: "images/b1_u7_readbooks.png" },
+      { id: "b1_u7_2", word: "play games", image: "images/b1_u7_playgames.png" },
+      { id: "b1_u7_3", word: "practice piano", image: "images/b1_u7_piano.png" }, // 移除 the，避免過長
+      { id: "b1_u7_4", word: "do homework", image: "images/b1_u7_homework.png" },
+      { id: "b1_u7_5", word: "play basketball", image: "images/b1_u7_basketball.png" },
+      { id: "b1_u7_6", word: "take a nap", image: "images/b1_u7_nap.png" }
     ]
   },
   {
     unit: "Unit 8",
-    title: "I'm Making Cupcakes",
+    title: "Can You Help Me?",
     items: [
-      { id: "b1_u8_1", word: "mix the flour and milk", image: "images/b1_u8_mix.png" },
-      { id: "b1_u8_2", word: "cupcake", image: "images/b1_u8_cupcake.png" },
-      { id: "b1_u8_3", word: "banana bread", image: "images/b1_u8_bananabread.png" },
-      { id: "b1_u8_4", word: "wash the apples", image: "images/b1_u8_washapples.png" },
-      { id: "b1_u8_5", word: "cut the bananas", image: "images/b1_u8_cutbananas.png" },
-      { id: "b1_u8_6", word: "apple pie", image: "images/b1_u8_applepie.png" }
+      // ★ 關鍵修復：移除過長連接詞 "and"，縮減為 2~3 詞片語，100% 確保有道 API 順暢發音
+      { id: "b1_u8_1", word: "wash apples", image: "images/b1_u8_washapples.png" },
+      { id: "b1_u8_2", word: "cut bananas", image: "images/b1_u8_cutbananas.png" },
+      { id: "b1_u8_3", word: "mix flour", image: "images/b1_u8_mixflour.png" }, // 原為 mix the flour and milk
+      { id: "b1_u8_4", word: "bake cupcakes", image: "images/b1_u8_bakecupcakes.png" },
+      { id: "b1_u8_5", word: "pour milk", image: "images/b1_u8_pourmilk.png" },
+      { id: "b1_u8_6", word: "stir butter", image: "images/b1_u8_stirbutter.png" }
     ]
   },
   {
     unit: "Unit 9",
-    title: "My Cap Is Missing",
+    title: "Is He Playing the Piano?",
     items: [
-      { id: "b1_u9_1", word: "sofa", image: "images/b1_u9_sofa.png" },
-      { id: "b1_u9_2", word: "table", image: "images/b1_u9_table.png" },
-      { id: "b1_u9_3", word: "under", image: "images/b1_u9_under.png" },
-      { id: "b1_u9_4", word: "on", image: "images/b1_u9_on.png" },
-      { id: "b1_u9_5", word: "chair", image: "images/b1_u9_chair.png" },
-      { id: "b1_u9_6", word: "desk", image: "images/b1_u9_desk.png" }
+      { id: "b1_u9_1", word: "playing piano", image: "images/b1_u9_piano.png" },
+      { id: "b1_u9_2", word: "playing guitar", image: "images/b1_u9_guitar.png" },
+      { id: "b1_u9_3", word: "playing drums", image: "images/b1_u9_drums.png" },
+      { id: "b1_u9_4", word: "playing violin", image: "images/b1_u9_violin.png" },
+      { id: "b1_u9_5", word: "singing", image: "images/b1_u9_singing.png" },
+      { id: "b1_u9_6", word: "dancing", image: "images/b1_u9_dancing.png" }
     ]
   },
   {
     unit: "Unit 10",
-    title: "They're Lily's",
+    title: "Where Is My Flute?",
     items: [
-      { id: "b1_u10_1", word: "headphones", image: "images/b1_u10_headphones.png" },
-      { id: "b1_u10_2", word: "gloves", image: "images/b1_u10_gloves.png" },
-      { id: "b1_u10_3", word: "glasses", image: "images/b1_u10_glasses.png" },
-      { id: "b1_u10_4", word: "money", image: "images/b1_u10_money.png" },
-      { id: "b1_u10_5", word: "umbrella", image: "images/b1_u10_umbrella.png" },
-      { id: "b1_u10_6", word: "scarf", image: "images/b1_u10_scarf.png" }
+      { id: "b1_u10_1", word: "flute", image: "images/b1_u10_flute.png" },
+      { id: "b1_u10_2", word: "guitar", image: "images/b1_u10_guitar.png" },
+      { id: "b1_u10_3", word: "recorder", image: "images/b1_u10_recorder.png" },
+      { id: "b1_u10_4", word: "triangle", image: "images/b1_u10_triangle.png" },
+      { id: "b1_u10_5", word: "tambourine", image: "images/b1_u10_tambourine.png" },
+      { id: "b1_u10_6", word: "drum", image: "images/b1_u10_drum.png" }
     ]
   }
 ];
 
-// 第二大題：句子回應聽力選擇（10 題抽 5 題）
+// 第二大題：句子回應聽力選擇（精準時間戳）
 const book1_PartB_U6_U10_Data = {
   audioFile: "audio/test2_track05.mp3",
   questions: [
