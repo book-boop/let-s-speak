@@ -880,7 +880,7 @@
       document.getElementById('btn-to-partB').style.display = 'none';
     }
 
-    // ★★★ 強化發音引擎：支援片語與多詞句子，解決只唸 3 個單詞問題 ★★★
+    // ★★★ 穩定版：第一大題語音播放（相容 iOS、Android、LINE、微信）★★★
     function playCurrentRoundAudio() {
       const roundData = partAGeneratedRounds[currentPartARoundIdx];
       stopCurrentAudio();
@@ -888,57 +888,96 @@
       const btn = document.getElementById('btn-play-partA');
       btn.innerHTML = `<span>⏳ 播放中...</span>`;
 
-      // 檢查是否能正常使用原生合成
-      const canUseSpeech = ('speechSynthesis' in window) && !navigator.userAgent.toLowerCase().includes('micromessenger');
+      const ua = navigator.userAgent.toLowerCase();
+      const isWeChat = ua.includes('micromessenger');
+      const isLine = ua.includes('line');
 
-      if (canUseSpeech) {
-        try {
-          const speechSentence = roundData.correctOrderWords.map((w, idx) => `Number ${idx + 1}. ${w}`).join('. ');
-          const utterance = new SpeechSynthesisUtterance(speechSentence);
-          utterance.lang = 'en-US';
-          utterance.rate = 0.85;
-          utterance.onend = () => { btn.innerHTML = `<span>🔊 播放音檔</span>`; };
-          utterance.onerror = () => { playOnlinePhraseSequence(roundData.correctOrderWords, btn); };
-          window.speechSynthesis.speak(utterance);
-        } catch (e) {
-          playOnlinePhraseSequence(roundData.correctOrderWords, btn);
-        }
-      } else {
-        playOnlinePhraseSequence(roundData.correctOrderWords, btn);
+      // 微信或 LINE 內建瀏覽器全面使用穩定音訊佇列播放
+      if (isWeChat || isLine || !('speechSynthesis' in window)) {
+        playOnlineWordSequence(roundData.correctOrderWords, btn);
+        return;
+      }
+
+      // 一般瀏覽器（Chrome, Safari, Edge）使用原生語音合成
+      try {
+        window.speechSynthesis.cancel(); // 喚醒防卡死
+
+        const speechSentence = roundData.correctOrderWords
+          .map((w, idx) => `Number ${idx + 1}, ${w}`)
+          .join('. ');
+
+        const utterance = new SpeechSynthesisUtterance(speechSentence);
+        utterance.lang = 'en-US';
+        utterance.rate = 0.85;
+
+        utterance.onend = () => {
+          btn.innerHTML = `<span>🔊 播放音檔</span>`;
+        };
+
+        utterance.onerror = () => {
+          console.warn("原生語音合成失敗，切換線上備援");
+          playOnlineWordSequence(roundData.correctOrderWords, btn);
+        };
+
+        window.speechSynthesis.speak(utterance);
+
+        // 防卡死逾時保護（若 12 秒內未結束自動復原按鈕）
+        setTimeout(() => {
+          if (btn.innerHTML.includes('播放中')) {
+            btn.innerHTML = `<span>🔊 播放音檔</span>`;
+          }
+        }, 12000);
+
+      } catch (err) {
+        console.warn("speechSynthesis 異常:", err);
+        playOnlineWordSequence(roundData.correctOrderWords, btn);
       }
     }
 
-    // 高相容性片語發音模組（支援長片語，不會因空白鍵中斷）
-    function playOnlinePhraseSequence(wordsArray, btn) {
-      let idx = 0;
-      function next() {
-        if (idx >= wordsArray.length) {
+    // 穩健型音訊發音模組：自動將片語依序排隊播放，徹底解決空格中斷問題
+    function playOnlineWordSequence(wordsArray, btn) {
+      let speechQueue = [];
+
+      // 將 6 個項目展開成播放佇列（例如："Number 1", "practice", "the", "piano"）
+      wordsArray.forEach((phrase, idx) => {
+        speechQueue.push(`Number ${idx + 1}`);
+        // 若為多詞片語，依空格拆分逐字加入發音隊列
+        const subWords = phrase.trim().split(/\s+/);
+        subWords.forEach(w => speechQueue.push(w));
+      });
+
+      let qIdx = 0;
+      function playNextToken() {
+        if (qIdx >= speechQueue.length) {
           if (btn) btn.innerHTML = `<span>🔊 播放音檔</span>`;
           return;
         }
-        const text = wordsArray[idx];
-        idx++;
 
-        // 使用支援長詞/片語的 Google TTS 串流 API
-        const encoded = encodeURIComponent(text);
-        const url = `https://translate.google.com/translate_tts?ie=UTF-8&q=${encoded}&tl=en&client=tw-ob`;
+        const token = speechQueue[qIdx];
+        qIdx++;
 
-        currentOnlineTtsAudio.src = url;
-        currentOnlineTtsAudio.onended = () => { setTimeout(next, 650); };
+        // 使用穩定免 API Key 字典發音
+        const cleanWord = token.replace(/[^a-zA-Z0-9 ]/g, '');
+        const soundUrl = `https://dict.youdao.com/dictvoice?audio=${encodeURIComponent(cleanWord)}&type=2`;
+
+        currentOnlineTtsAudio.src = soundUrl;
+        
+        currentOnlineTtsAudio.onended = () => {
+          // 序號唸完停頓久一點(400ms)，片語內的字銜接快一點(150ms)
+          const delay = token.startsWith('Number') ? 350 : 180;
+          setTimeout(playNextToken, delay);
+        };
+
         currentOnlineTtsAudio.onerror = () => {
-          // 如果 Google TTS 受阻，自動降級使用詞典 API
-          const fallbackUrl = `https://dict.youdao.com/dictvoice?audio=${encoded}&type=2`;
-          currentOnlineTtsAudio.src = fallbackUrl;
-          currentOnlineTtsAudio.onended = () => { setTimeout(next, 650); };
-          currentOnlineTtsAudio.onerror = () => { setTimeout(next, 300); }; // 避免卡死直接跳下一題
-          currentOnlineTtsAudio.play().catch(() => { setTimeout(next, 300); });
+          setTimeout(playNextToken, 100); // 即使個別單字網路受阻也順暢跳過不卡死
         };
 
         currentOnlineTtsAudio.play().catch(() => {
-          setTimeout(next, 400);
+          setTimeout(playNextToken, 100);
         });
       }
-      next();
+
+      playNextToken();
     }
 
     function submitPartAAnswer() {
