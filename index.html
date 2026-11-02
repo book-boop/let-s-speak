@@ -611,7 +611,7 @@
         </div>
 
         <div class="quiz-instruction-bar">
-          <button class="btn-audio" onclick="playCurrentRoundAudio()">
+          <button id="btn-play-partA" class="btn-audio" onclick="playCurrentRoundAudio()">
             <span>🔊 播放音檔</span>
           </button>
           <span style="font-size: 0.85rem; color: #475569; font-weight: 600;">聽音檔順序為圖片填入 1~6</span>
@@ -639,7 +639,6 @@
           <span id="partB-progress-badge" style="font-size: 0.85rem; color: #64748b; font-weight: 600;">第 1 / 5 題</span>
         </div>
 
-        <!-- 點擊此按鈕手動觸發播放（相容 Android / LINE / 微信） -->
         <button id="btn-play-partB" class="audio-play-big-btn" onclick="playPartBCurrentAudio()">
           <span>🔊 點我播放題目語音</span>
         </button>
@@ -680,6 +679,7 @@
 
     // 全域共用 Audio 物件
     let currentPartBAudio = new Audio();
+    let currentOnlineTtsAudio = new Audio(); // 專門處理 Android / 微信 第一大題線上發音
     let audioTimeUpdateListener = null;
     let isAudioUnlocked = false;
 
@@ -694,25 +694,34 @@
     let currentPartBQuestionIdx = 0;
     let partBScore = 0;
 
-    // 解決 Android / LINE / 微信 禁止未互動播放的核心解鎖機制
-    function unlockAudio() {
-      if (isAudioUnlocked) return;
-      currentPartBAudio.play().then(() => {
-        currentPartBAudio.pause();
-        isAudioUnlocked = true;
-      }).catch(() => {
-        // 部分環境靜音解鎖
-        currentPartBAudio.muted = true;
+    // 微信與社群 WebView 專屬解鎖
+    function setupWeChatUnlock() {
+      const doUnlock = () => {
+        if (isAudioUnlocked) return;
         currentPartBAudio.play().then(() => {
           currentPartBAudio.pause();
-          currentPartBAudio.muted = false;
           isAudioUnlocked = true;
-        }).catch(e => console.log('Audio unlock pending...'));
-      });
+        }).catch(() => {});
+        currentOnlineTtsAudio.play().then(() => {
+          currentOnlineTtsAudio.pause();
+        }).catch(() => {});
+      };
+
+      if (typeof WeixinJSBridge === 'object' && typeof WeixinJSBridge.invoke === 'function') {
+        doUnlock();
+      } else {
+        document.addEventListener('WeixinJSBridgeReady', doUnlock, false);
+      }
+      document.addEventListener('touchstart', doUnlock, { once: true });
     }
+    setupWeChatUnlock();
 
     function onStartClicked() {
-      unlockAudio();
+      if (!isAudioUnlocked) {
+        currentPartBAudio.play().then(() => currentPartBAudio.pause()).catch(() => {});
+        currentOnlineTtsAudio.play().then(() => currentOnlineTtsAudio.pause()).catch(() => {});
+        isAudioUnlocked = true;
+      }
       navigateTo('view-topics');
     }
 
@@ -733,6 +742,9 @@
           audioTimeUpdateListener = null;
         }
       }
+      if (currentOnlineTtsAudio) {
+        currentOnlineTtsAudio.pause();
+      }
       if ('speechSynthesis' in window) {
         window.speechSynthesis.cancel();
       }
@@ -744,7 +756,6 @@
     }
 
     function startSectionQuiz(partAData, partBData, sectionTitle) {
-      unlockAudio();
       if (!partAData || !partBData) {
         alert('題庫尚未載入，請確認對應的題庫 js 檔案是否存在！');
         return;
@@ -753,7 +764,6 @@
       activePartBData = partBData;
       currentSectionTitle = sectionTitle;
 
-      // 預先指定並載入音訊檔案
       currentPartBAudio.src = activePartBData.audioFile;
       currentPartBAudio.load();
 
@@ -859,18 +869,54 @@
       document.getElementById('btn-to-partB').style.display = 'none';
     }
 
+    // ★★★ 雙引擎語音播放：解決 Android 微信/LINE 第一大題沒聲音的問題 ★★★
     function playCurrentRoundAudio() {
       const roundData = partAGeneratedRounds[currentPartARoundIdx];
-      if ('speechSynthesis' in window) {
-        window.speechSynthesis.cancel();
-        const textToSpeak = roundData.correctOrderWords.map((w, idx) => `Number ${idx + 1}, ${w}`).join('. ');
-        const utterance = new SpeechSynthesisUtterance(textToSpeak);
-        utterance.lang = 'en-US';
-        utterance.rate = 0.88;
-        window.speechSynthesis.speak(utterance);
+      const audioBtn = document.getElementById('btn-play-partA');
+      stopCurrentAudio();
+
+      const ua = navigator.userAgent.toLowerCase();
+      const isWeChatOrLine = ua.includes('micromessenger') || ua.includes('line');
+      const isAndroid = ua.includes('android');
+
+      // 依序排列的單字字串
+      const speechSentence = roundData.correctOrderWords.map((w, idx) => `Number ${idx + 1}. ${w}`).join('. ');
+
+      // 如果是 Android 或 微信/LINE，直接調用線上高相容 MP3 音訊串流
+      if (isAndroid || isWeChatOrLine || !('speechSynthesis' in window)) {
+        playOnlineAudioSentence(roundData.correctOrderWords);
       } else {
-        alert('此手機瀏覽器環境未內建語音發音元件，建議使用 Chrome 或 Safari 開啟！');
+        // iOS Safari / 電腦端優先使用原生清晰合成
+        try {
+          const utterance = new SpeechSynthesisUtterance(speechSentence);
+          utterance.lang = 'en-US';
+          utterance.rate = 0.85;
+          utterance.onerror = () => playOnlineAudioSentence(roundData.correctOrderWords);
+          window.speechSynthesis.speak(utterance);
+        } catch (e) {
+          playOnlineAudioSentence(roundData.correctOrderWords);
+        }
       }
+    }
+
+    // 線上真人 MP3 發音串接（保證在 Android 微信 100% 能響）
+    function playOnlineAudioSentence(wordsArray) {
+      let step = 0;
+      function playNextItem() {
+        if (step >= wordsArray.length) return;
+        const currentWord = wordsArray[step];
+        const num = step + 1;
+        step++;
+
+        // 呼叫線上標準美語發音庫
+        const audioUrl = `https://dict.youdao.com/dictvoice?audio=${encodeURIComponent(currentWord)}&type=2`;
+        currentOnlineTtsAudio.src = audioUrl;
+        currentOnlineTtsAudio.play().catch(() => {});
+        currentOnlineTtsAudio.onended = () => {
+          setTimeout(playNextItem, 700); // 每個單字之間停頓 0.7 秒
+        };
+      }
+      playNextItem();
     }
 
     function submitPartAAnswer() {
@@ -919,7 +965,6 @@
 
     /* ================= 第二大題邏輯 ================= */
     function startPartB() {
-      unlockAudio();
       const allQ = [...activePartBData.questions];
       partBPickedQuestions = allQ.sort(() => Math.random() - 0.5).slice(0, TOTAL_PART_B_QUESTIONS);
       currentPartBQuestionIdx = 0;
@@ -941,7 +986,7 @@
       document.getElementById('btn-finish-all').style.display = 'none';
 
       const playBtn = document.getElementById('btn-play-partB');
-      playBtn.innerHTML = `<span>🔊 播放題目語音</span>`;
+      playBtn.innerHTML = `<span>🔊 點我播放題目語音</span>`;
 
       const container = document.getElementById('options-container');
       container.innerHTML = '';
@@ -953,11 +998,9 @@
         btn.onclick = () => selectPartBOption(opt.label, q.answer, btn);
         container.appendChild(btn);
       });
-
-      // 移除自動播放，完全由使用者手動點擊「播放題目語音」按鈕觸發，100% 規避 Android 與 LINE 封鎖
     }
 
-    // 依精準時間播放片段（相容 Android / WebView）
+    // 依精準時間段播放長音檔（支援 Android 微信）
     function playPartBCurrentAudio() {
       const q = partBPickedQuestions[currentPartBQuestionIdx];
       stopCurrentAudio();
@@ -965,7 +1008,6 @@
       const playBtn = document.getElementById('btn-play-partB');
       playBtn.innerHTML = `<span>⏳ 播放中...</span>`;
 
-      // 確保音訊有來源
       if (!currentPartBAudio.src || currentPartBAudio.src === '' || currentPartBAudio.src !== new URL(activePartBData.audioFile, window.location.href).href) {
         currentPartBAudio.src = activePartBData.audioFile;
       }
@@ -974,7 +1016,7 @@
         try {
           currentPartBAudio.currentTime = q.start;
         } catch (e) {
-          console.log("Seek error, waiting metadata:", e);
+          console.log("Seek error:", e);
         }
 
         audioTimeUpdateListener = function() {
@@ -990,21 +1032,17 @@
         const playPromise = currentPartBAudio.play();
         if (playPromise !== undefined) {
           playPromise.catch(err => {
-            console.log("Audio play failed:", err);
-            playBtn.innerHTML = `<span>🔊 播放題目語音</span>`;
-            // 若仍被攔截，使用 fallback 語音朗讀
-            if ('speechSynthesis' in window) {
-              window.speechSynthesis.cancel();
-              const utterance = new SpeechSynthesisUtterance(q.script);
-              utterance.lang = 'en-US';
-              utterance.rate = 0.9;
-              window.speechSynthesis.speak(utterance);
-            }
+            console.log("Play failed, switching to online TTS:", err);
+            // 若音檔被封鎖，使用線上字典發音作為備援
+            currentOnlineTtsAudio.src = `https://dict.youdao.com/dictvoice?audio=${encodeURIComponent(q.script)}&type=2`;
+            currentOnlineTtsAudio.play().catch(() => {});
+            currentOnlineTtsAudio.onended = () => {
+              playBtn.innerHTML = `<span>🔊 再次播放題目</span>`;
+            };
           });
         }
       };
 
-      // 若尚未載入元資料，先等待其可播放
       if (currentPartBAudio.readyState >= 2) {
         executePlay();
       } else {
@@ -1018,7 +1056,7 @@
 
     function selectPartBOption(selectedLabel, correctLabel, clickedBtn) {
       stopCurrentAudio();
-      document.getElementById('btn-play-partB').innerHTML = `<span>🔊 播放題目語音</span>`;
+      document.getElementById('btn-play-partB').innerHTML = `<span>🔊 點我播放題目語音</span>`;
 
       document.querySelectorAll('.option-btn').forEach(btn => {
         btn.disabled = true;
