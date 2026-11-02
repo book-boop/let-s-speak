@@ -927,19 +927,25 @@
       playAudioQueueByTag(roundData.correctOrderWords, btn);
     }
 
-    // 通用 Audio 標籤安全發音隊列
+    // 通用 Audio 隊列播放模組（強化版：長片語自動分流 + 超時防卡死）
     function playAudioQueueByTag(wordsArray, btn) {
       let queue = [];
 
+      // 建立包含題號與單字/片語的播放列表
       wordsArray.forEach((phrase, idx) => {
-        queue.push(`Number+${idx + 1}`);
-        const formattedPhrase = phrase.trim().replace(/\s+/g, '+');
-        queue.push(formattedPhrase);
+        queue.push({ type: 'number', text: `Number ${idx + 1}` });
+        queue.push({ type: 'word', text: phrase.trim() });
       });
 
       let currentStep = 0;
+      let stepTimeout = null;
 
       function playNext() {
+        if (stepTimeout) {
+          clearTimeout(stepTimeout);
+          stepTimeout = null;
+        }
+
         if (currentStep >= queue.length) {
           if (btn) btn.innerHTML = `<span>🔊 播放音檔</span>`;
           return;
@@ -948,25 +954,55 @@
         const item = queue[currentStep];
         currentStep++;
 
-        const soundUrl = `https://dict.youdao.com/dictvoice?audio=${encodeURIComponent(item)}&type=2`;
+        let soundUrl = '';
+        const wordCount = item.text.split(/\s+/).length;
+
+        // 如果是長片語（3 個字以上，例如 "mix the flour and milk"），改用長句 TTS 引擎
+        if (wordCount >= 3) {
+          soundUrl = `https://translate.google.com/translate_tts?ie=UTF-8&q=${encodeURIComponent(item.text)}&tl=en&client=tw-ob`;
+        } else {
+          // 單字或短片語使用有道詞典
+          const formatted = item.text.replace(/\s+/g, '+');
+          soundUrl = `https://dict.youdao.com/dictvoice?audio=${encodeURIComponent(formatted)}&type=2`;
+        }
+
         currentTtsAudio.src = soundUrl;
 
+        // 播放結束後自動接續下一首
         currentTtsAudio.onended = () => {
-          const pauseTime = item.startsWith('Number') ? 350 : 700;
-          setTimeout(playNext, pauseTime);
+          const pauseTime = item.type === 'number' ? 350 : 750;
+          stepTimeout = setTimeout(playNext, pauseTime);
         };
 
+        // 遇到載入錯誤時，自動切換備援引擎或跳過，絕不卡死
         currentTtsAudio.onerror = () => {
-          setTimeout(playNext, 200);
+          console.warn(`發音載入受阻: ${item.text}，切換備用線路`);
+          // 備用線路：Google TTS
+          const backupUrl = `https://translate.google.com/translate_tts?ie=UTF-8&q=${encodeURIComponent(item.text)}&tl=en&client=tw-ob`;
+          currentTtsAudio.src = backupUrl;
+          currentTtsAudio.onerror = () => {
+            stepTimeout = setTimeout(playNext, 200); // 再次失敗則跳過不卡死
+          };
+          currentTtsAudio.play().catch(() => {
+            stepTimeout = setTimeout(playNext, 200);
+          });
         };
 
+        // 啟動播放
         const playPromise = currentTtsAudio.play();
         if (playPromise !== undefined) {
           playPromise.catch(err => {
             console.warn("Audio play prevented:", err);
-            setTimeout(playNext, 200);
+            stepTimeout = setTimeout(playNext, 300);
           });
         }
+
+        // 安全防呆機制：若 3 秒內未觸發 onended 也未報錯，強制跳下一題
+        stepTimeout = setTimeout(() => {
+          if (currentTtsAudio.paused) {
+            playNext();
+          }
+        }, 3200);
       }
 
       playNext();
