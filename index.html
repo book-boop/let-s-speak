@@ -101,7 +101,6 @@
       to { opacity: 1; transform: translateY(0); }
     }
 
-    /* 扉頁 */
     .books-row {
       display: flex;
       justify-content: center;
@@ -162,7 +161,6 @@
       color: #0f172a;
     }
 
-    /* 選單頁 */
     .topics-columns-container {
       width: 100%;
       max-width: 760px;
@@ -229,7 +227,6 @@
 
     .btn-back:hover { color: #0f172a; }
 
-    /* 第一大題：單字排序 */
     .quiz-view-wrapper {
       width: 100%;
       max-width: 780px;
@@ -422,7 +419,6 @@
       min-height: 24px;
     }
 
-    /* 第二大題樣式 */
     .part-b-box {
       width: 100%;
       max-width: 620px;
@@ -560,7 +556,7 @@
       <div class="arch-curve"></div>
     </header>
 
-    <!-- 1. 扉頁（首頁） -->
+    <!-- 1. 扉頁 -->
     <section id="view-cover" class="view-section active">
       <div class="books-row">
         <div class="book-item" title="Book 1 (U1-U15)">
@@ -679,8 +675,9 @@
     let activePartBData = null;
     let currentSectionTitle = '';
 
+    // 全域共用 Audio 物件
     let currentPartBAudio = new Audio();
-    let currentOnlineTtsAudio = new Audio();
+    let currentTtsAudio = new Audio();
     let audioTimeUpdateListener = null;
     let isAudioUnlocked = false;
 
@@ -695,28 +692,23 @@
     let currentPartBQuestionIdx = 0;
     let partBScore = 0;
 
-    // 微信與手機瀏覽器音訊解鎖機制
-    function setupAudioUnlock() {
-      const doUnlock = () => {
-        if (isAudioUnlocked) return;
-        currentPartBAudio.play().then(() => { currentPartBAudio.pause(); isAudioUnlocked = true; }).catch(() => {});
-        currentOnlineTtsAudio.play().then(() => { currentOnlineTtsAudio.pause(); }).catch(() => {});
-      };
-      if (typeof WeixinJSBridge === 'object' && typeof WeixinJSBridge.invoke === 'function') {
-        doUnlock();
-      } else {
-        document.addEventListener('WeixinJSBridgeReady', doUnlock, false);
-      }
-      document.addEventListener('touchstart', doUnlock, { once: true });
+    // 微信與手機專屬手勢音訊解鎖機制
+    function triggerUnlockAudio() {
+      if (isAudioUnlocked) return;
+      currentPartBAudio.play().then(() => { currentPartBAudio.pause(); }).catch(() => {});
+      currentTtsAudio.play().then(() => { currentTtsAudio.pause(); }).catch(() => {});
+      isAudioUnlocked = true;
     }
-    setupAudioUnlock();
+
+    if (typeof WeixinJSBridge === 'object' && typeof WeixinJSBridge.invoke === 'function') {
+      triggerUnlockAudio();
+    } else {
+      document.addEventListener('WeixinJSBridgeReady', triggerUnlockAudio, false);
+    }
+    document.addEventListener('touchstart', triggerUnlockAudio, { once: true });
 
     function onStartClicked() {
-      if (!isAudioUnlocked) {
-        currentPartBAudio.play().then(() => currentPartBAudio.pause()).catch(() => {});
-        currentOnlineTtsAudio.play().then(() => currentOnlineTtsAudio.pause()).catch(() => {});
-        isAudioUnlocked = true;
-      }
+      triggerUnlockAudio();
       navigateTo('view-topics');
     }
 
@@ -735,10 +727,10 @@
           audioTimeUpdateListener = null;
         }
       }
-      if (currentOnlineTtsAudio) {
-        currentOnlineTtsAudio.pause();
-        currentOnlineTtsAudio.onended = null;
-        currentOnlineTtsAudio.onerror = null;
+      if (currentTtsAudio) {
+        currentTtsAudio.pause();
+        currentTtsAudio.onended = null;
+        currentTtsAudio.onerror = null;
       }
       if ('speechSynthesis' in window) {
         window.speechSynthesis.cancel();
@@ -751,10 +743,7 @@
     }
 
     function startSectionQuiz(sectionKey, sectionTitle) {
-      if (!isAudioUnlocked) {
-        currentPartBAudio.play().then(() => currentPartBAudio.pause()).catch(() => {});
-        isAudioUnlocked = true;
-      }
+      triggerUnlockAudio();
 
       let pA = null, pB = null;
       if (sectionKey === 'book1_u1_u5') {
@@ -772,7 +761,7 @@
       }
 
       if (!pA || !pB) {
-        alert('題庫檔案載入失敗，請確認檔案已放置於同一目錄且檔名正確：' + sectionKey + '.js');
+        alert('題庫檔案載入失敗，請確認檔案已放置於同一目錄：' + sectionKey + '.js');
         return;
       }
 
@@ -885,7 +874,7 @@
       document.getElementById('btn-to-partB').style.display = 'none';
     }
 
-    // 第一大題語音播放：單一完整長句合成串流
+    // 第一大題發音：優先原生語音，社群/Android 採用片語安全隊列發音
     function playCurrentRoundAudio() {
       const roundData = partAGeneratedRounds[currentPartARoundIdx];
       stopCurrentAudio();
@@ -893,34 +882,33 @@
       const btn = document.getElementById('btn-play-partA');
       btn.innerHTML = `<span>⏳ 播放中...</span>`;
 
-      // 組合出完整連續朗讀的句子（包含題號與單字/片語）
-      const fullText = roundData.correctOrderWords
-        .map((w, idx) => `Number ${idx + 1}, ${w}.`)
-        .join(' ');
-
       const ua = navigator.userAgent.toLowerCase();
       const isWeChat = ua.includes('micromessenger');
       const isLine = ua.includes('line');
 
       if (isWeChat || isLine || !('speechSynthesis' in window)) {
-        playSingleAudioStream(fullText, btn);
+        playPhraseSafeQueue(roundData.correctOrderWords, btn);
         return;
       }
 
+      // iOS Safari 或一般 Chrome 瀏覽器優先使用原生合成
       try {
         window.speechSynthesis.cancel();
 
-        const utterance = new SpeechSynthesisUtterance(fullText);
+        const fullSpeech = roundData.correctOrderWords
+          .map((w, idx) => `Number ${idx + 1}, ${w}`)
+          .join('. ');
+
+        const utterance = new SpeechSynthesisUtterance(fullSpeech);
         utterance.lang = 'en-US';
-        utterance.rate = 0.88;
+        utterance.rate = 0.86;
 
         utterance.onend = () => {
           btn.innerHTML = `<span>🔊 播放音檔</span>`;
         };
 
         utterance.onerror = () => {
-          console.warn("原生合成受阻，切換單一音訊串流備援");
-          playSingleAudioStream(fullText, btn);
+          playPhraseSafeQueue(roundData.correctOrderWords, btn);
         };
 
         window.speechSynthesis.speak(utterance);
@@ -929,45 +917,46 @@
           if (btn.innerHTML.includes('播放中')) {
             btn.innerHTML = `<span>🔊 播放音檔</span>`;
           }
-        }, 15000);
+        }, 14000);
 
       } catch (err) {
-        playSingleAudioStream(fullText, btn);
+        playPhraseSafeQueue(roundData.correctOrderWords, btn);
       }
     }
 
-    // 將整段句子以「單一音訊」播放到底（避免被瀏覽器阻擋連續播放）
-    function playSingleAudioStream(text, btn) {
-      if (!currentOnlineTtsAudio) {
-        currentOnlineTtsAudio = new Audio();
+    // 片語安全隊列發音（將片語中的空白轉為 +，使詞典 API 能完整發出長片語）
+    function playPhraseSafeQueue(wordsArray, btn) {
+      let idx = 0;
+
+      function playNextItem() {
+        if (idx >= wordsArray.length) {
+          if (btn) btn.innerHTML = `<span>🔊 播放音檔</span>`;
+          return;
+        }
+
+        const currentWord = wordsArray[idx];
+        idx++;
+
+        // 將片語內的空白轉換為 +，有道發音伺服器能完整回傳該片語發音
+        const formattedPhrase = currentWord.trim().replace(/\s+/g, '+');
+        const soundUrl = `https://dict.youdao.com/dictvoice?audio=${encodeURIComponent(formattedPhrase)}&type=2`;
+
+        currentTtsAudio.src = soundUrl;
+
+        currentTtsAudio.onended = () => {
+          setTimeout(playNextItem, 700); // 單字/片語之間間隔 0.7 秒
+        };
+
+        currentTtsAudio.onerror = () => {
+          setTimeout(playNextItem, 250); // 若遇網路異常自動跳下一題，不卡死
+        };
+
+        currentTtsAudio.play().catch(() => {
+          setTimeout(playNextItem, 250);
+        });
       }
 
-      const streamUrl = `https://api.streamelements.com/kappa/v2/speech?voice=en-US-Standard-C&text=${encodeURIComponent(text)}`;
-
-      currentOnlineTtsAudio.src = streamUrl;
-
-      currentOnlineTtsAudio.onended = () => {
-        if (btn) btn.innerHTML = `<span>🔊 播放音檔</span>`;
-      };
-
-      currentOnlineTtsAudio.onerror = () => {
-        const backupUrl = `https://translate.google.com/translate_tts?ie=UTF-8&q=${encodeURIComponent(text)}&tl=en&total=1&idx=0&client=tw-ob`;
-        currentOnlineTtsAudio.src = backupUrl;
-        currentOnlineTtsAudio.onended = () => {
-          if (btn) btn.innerHTML = `<span>🔊 播放音檔</span>`;
-        };
-        currentOnlineTtsAudio.onerror = () => {
-          if (btn) btn.innerHTML = `<span>🔊 播放音檔</span>`;
-        };
-        currentOnlineTtsAudio.play().catch(() => {
-          if (btn) btn.innerHTML = `<span>🔊 播放音檔</span>`;
-        });
-      };
-
-      currentOnlineTtsAudio.play().catch(e => {
-        console.warn("音訊播放被攔截:", e);
-        if (btn) btn.innerHTML = `<span>🔊 播放音檔</span>`;
-      });
+      playNextItem();
     }
 
     function submitPartAAnswer() {
@@ -1016,6 +1005,7 @@
 
     /* ================= 第二大題邏輯 ================= */
     function startPartB() {
+      triggerUnlockAudio();
       const allQ = [...activePartBData.questions];
       partBPickedQuestions = allQ.sort(() => Math.random() - 0.5).slice(0, TOTAL_PART_B_QUESTIONS);
       currentPartBQuestionIdx = 0;
@@ -1064,50 +1054,35 @@
         currentPartBAudio.load();
       }
 
-      const doPlaySegment = () => {
-        try {
-          currentPartBAudio.currentTime = q.start;
-        } catch (e) {
-          console.warn("Seek error:", e);
-        }
+      try {
+        currentPartBAudio.currentTime = q.start;
+      } catch (e) {
+        console.warn("Seek error:", e);
+      }
 
-        if (audioTimeUpdateListener) {
+      if (audioTimeUpdateListener) {
+        currentPartBAudio.removeEventListener('timeupdate', audioTimeUpdateListener);
+        audioTimeUpdateListener = null;
+      }
+
+      audioTimeUpdateListener = function() {
+        if (currentPartBAudio.currentTime >= q.end && currentPartBAudio.currentTime > q.start) {
+          currentPartBAudio.pause();
           currentPartBAudio.removeEventListener('timeupdate', audioTimeUpdateListener);
           audioTimeUpdateListener = null;
-        }
-
-        audioTimeUpdateListener = function() {
-          if (currentPartBAudio.currentTime >= q.end && currentPartBAudio.currentTime > q.start) {
-            currentPartBAudio.pause();
-            currentPartBAudio.removeEventListener('timeupdate', audioTimeUpdateListener);
-            audioTimeUpdateListener = null;
-            playBtn.innerHTML = `<span>🔊 再次播放題目</span>`;
-          }
-        };
-        currentPartBAudio.addEventListener('timeupdate', audioTimeUpdateListener);
-
-        const playPromise = currentPartBAudio.play();
-        if (playPromise !== undefined) {
-          playPromise.then(() => {
-            playBtn.innerHTML = `<span>🔊 播放中...</span>`;
-          }).catch(err => {
-            console.error("播放失敗:", err);
-            playBtn.innerHTML = `<span>🔊 播放題目語音</span>`;
-          });
+          playBtn.innerHTML = `<span>🔊 再次播放題目</span>`;
         }
       };
+      currentPartBAudio.addEventListener('timeupdate', audioTimeUpdateListener);
 
-      if (currentPartBAudio.readyState >= 1) {
-        doPlaySegment();
-      } else {
-        const onReady = () => {
-          currentPartBAudio.removeEventListener('loadedmetadata', onReady);
-          currentPartBAudio.removeEventListener('canplay', onReady);
-          doPlaySegment();
-        };
-        currentPartBAudio.addEventListener('loadedmetadata', onReady, { once: true });
-        currentPartBAudio.addEventListener('canplay', onReady, { once: true });
-        setTimeout(() => { if (currentPartBAudio.paused) doPlaySegment(); }, 1200);
+      const playPromise = currentPartBAudio.play();
+      if (playPromise !== undefined) {
+        playPromise.then(() => {
+          playBtn.innerHTML = `<span>🔊 播放中...</span>`;
+        }).catch(err => {
+          console.warn("直接播放失敗，等待載入或再次點擊:", err);
+          playBtn.innerHTML = `<span>🔊 點我播放題目語音</span>`;
+        });
       }
     }
 
