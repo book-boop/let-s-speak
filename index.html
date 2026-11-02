@@ -101,6 +101,7 @@
       to { opacity: 1; transform: translateY(0); }
     }
 
+    /* 扉頁 */
     .books-row {
       display: flex;
       justify-content: center;
@@ -161,6 +162,7 @@
       color: #0f172a;
     }
 
+    /* 選單頁 */
     .topics-columns-container {
       width: 100%;
       max-width: 760px;
@@ -227,6 +229,7 @@
 
     .btn-back:hover { color: #0f172a; }
 
+    /* 第一大題：單字排序 */
     .quiz-view-wrapper {
       width: 100%;
       max-width: 780px;
@@ -419,6 +422,7 @@
       min-height: 24px;
     }
 
+    /* 第二大題樣式 */
     .part-b-box {
       width: 100%;
       max-width: 620px;
@@ -874,7 +878,7 @@
       document.getElementById('btn-to-partB').style.display = 'none';
     }
 
-    // 第一大題發音：優先原生語音，社群/Android 採用片語安全隊列發音
+    // 第一大題：發音處理核心
     function playCurrentRoundAudio() {
       const roundData = partAGeneratedRounds[currentPartARoundIdx];
       stopCurrentAudio();
@@ -886,6 +890,7 @@
       const isWeChat = ua.includes('micromessenger');
       const isLine = ua.includes('line');
 
+      // 非微信/LINE 且支援 SpeechSynthesis 時優先嘗試原生語音
       if (!isWeChat && !isLine && ('speechSynthesis' in window)) {
         try {
           window.speechSynthesis.cancel();
@@ -915,14 +920,14 @@
           }, 14000);
           return;
         } catch (err) {
-          // 異常自動走標籤隊列
+          // 異常時降級執行隊列播放
         }
       }
 
       playAudioQueueByTag(roundData.correctOrderWords, btn);
     }
 
-    // 片語安全隊列發音（將片語內的空白轉換為 +，避開跨域問題並完整回傳發音）
+    // 通用 Audio 標籤安全發音隊列
     function playAudioQueueByTag(wordsArray, btn) {
       let queue = [];
 
