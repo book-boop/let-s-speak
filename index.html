@@ -597,7 +597,7 @@
         <div class="book-column">
           <div class="column-title">Book 3</div>
           <button class="unit-pill-btn book3" onclick="startSectionQuiz('book3_u1_u5', 'Book 3 • U1~U5')">U1 - U5</button>
-          <button class="unit-pill-btn book3" onclick="openComingSoon('Book 3', 'U6 - U10')">U6 - U10</button>
+          <button class="unit-pill-btn book3" onclick="startSectionQuiz('book3_u6_u10', 'Book 3 • U6~U10')">U6 - U10</button>
           <button class="unit-pill-btn book3" onclick="openComingSoon('Book 3', 'U11 - U15')">U11 - U15</button>
         </div>
       </div>
@@ -676,6 +676,7 @@
   <script src="book2_u6_u10.js"></script>
   <script src="book2_u11_u15.js"></script>
   <script src="book3_u1_u5.js"></script>
+  <script src="book3_u6_u10.js"></script>
 
   <script>
     let activePartAData = null;
@@ -774,6 +775,9 @@
       } else if (sectionKey === 'book3_u1_u5') {
         pA = typeof book3_U1_U5_Data !== 'undefined' ? book3_U1_U5_Data : null;
         pB = typeof book3_PartB_U1_U5_Data !== 'undefined' ? book3_PartB_U1_U5_Data : null;
+      } else if (sectionKey === 'book3_u6_u10') {
+        pA = typeof book3_U6_U10_Data !== 'undefined' ? book3_U6_U10_Data : null;
+        pB = typeof book3_PartB_U6_U10_Data !== 'undefined' ? book3_PartB_U6_U10_Data : null;
       }
 
       if (!pA || !pB) {
