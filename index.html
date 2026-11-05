@@ -1068,25 +1068,19 @@
 
     /* ================= 第二大題邏輯 ================= */
     function startPartB() {
-  triggerUnlockAudio();
-  let allQ = [...activePartBData.questions];
-  // 若題庫定義了 sharedOptions，動態映射到每道題目的 options 屬性
-  if (activePartBData.sharedOptions) {
-    allQ = allQ.map(q => ({
-      ...q,
-      options: activePartBData.sharedOptions
-    }));
-  }
-  partBPickedQuestions = allQ.sort(() => Math.random() - 0.5).slice(0, TOTAL_PART_B_QUESTIONS);
-  currentPartBQuestionIdx = 0;
-  partBScore = 0;
+      triggerUnlockAudio();
+      const allQ = [...activePartBData.questions];
+      // 隨機抽 5 題
+      partBPickedQuestions = allQ.sort(() => Math.random() - 0.5).slice(0, TOTAL_PART_B_QUESTIONS);
+      currentPartBQuestionIdx = 0;
+      partBScore = 0;
 
-  currentPartBAudio.src = activePartBData.audioFile;
-  currentPartBAudio.load();
+      currentPartBAudio.src = activePartBData.audioFile;
+      currentPartBAudio.load();
 
-  navigateTo('view-quiz-partB');
-  loadPartBQuestion(currentPartBQuestionIdx);
-}
+      navigateTo('view-quiz-partB');
+      loadPartBQuestion(currentPartBQuestionIdx);
+    }
 
     function loadPartBQuestion(qIdx) {
       const q = partBPickedQuestions[qIdx];
