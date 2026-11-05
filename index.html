@@ -598,7 +598,7 @@
           <div class="column-title">Book 3</div>
           <button class="unit-pill-btn book3" onclick="startSectionQuiz('book3_u1_u5', 'Book 3 • U1~U5')">U1 - U5</button>
           <button class="unit-pill-btn book3" onclick="startSectionQuiz('book3_u6_u10', 'Book 3 • U6~U10')">U6 - U10</button>
-          <button class="unit-pill-btn book3" onclick="openComingSoon('Book 3', 'U11 - U15')">U11 - U15</button>
+          <button class="unit-pill-btn book3" onclick="startSectionQuiz('book3_u11_u15', 'Book 3 • U11~U15')">U11 - U15</button>
         </div>
       </div>
       <button class="btn-back" onclick="navigateTo('view-cover')">← 返回封面</button>
@@ -677,6 +677,7 @@
   <script src="book2_u11_u15.js"></script>
   <script src="book3_u1_u5.js"></script>
   <script src="book3_u6_u10.js"></script>
+  <script src="book3_u11_u15.js"></script>
 
   <script>
     let activePartAData = null;
@@ -778,6 +779,9 @@
       } else if (sectionKey === 'book3_u6_u10') {
         pA = typeof book3_U6_U10_Data !== 'undefined' ? book3_U6_U10_Data : null;
         pB = typeof book3_PartB_U6_U10_Data !== 'undefined' ? book3_PartB_U6_U10_Data : null;
+      } else if (sectionKey === 'book3_u11_u15') {
+        pA = typeof book3_U11_U15_Data !== 'undefined' ? book3_U11_U15_Data : null;
+        pB = typeof book3_PartB_U11_U15_Data !== 'undefined' ? book3_PartB_U11_U15_Data : null;
       }
 
       if (!pA || !pB) {
@@ -1064,18 +1068,25 @@
 
     /* ================= 第二大題邏輯 ================= */
     function startPartB() {
-      triggerUnlockAudio();
-      const allQ = [...activePartBData.questions];
-      partBPickedQuestions = allQ.sort(() => Math.random() - 0.5).slice(0, TOTAL_PART_B_QUESTIONS);
-      currentPartBQuestionIdx = 0;
-      partBScore = 0;
+  triggerUnlockAudio();
+  let allQ = [...activePartBData.questions];
+  // 若題庫定義了 sharedOptions，動態映射到每道題目的 options 屬性
+  if (activePartBData.sharedOptions) {
+    allQ = allQ.map(q => ({
+      ...q,
+      options: activePartBData.sharedOptions
+    }));
+  }
+  partBPickedQuestions = allQ.sort(() => Math.random() - 0.5).slice(0, TOTAL_PART_B_QUESTIONS);
+  currentPartBQuestionIdx = 0;
+  partBScore = 0;
 
-      currentPartBAudio.src = activePartBData.audioFile;
-      currentPartBAudio.load();
+  currentPartBAudio.src = activePartBData.audioFile;
+  currentPartBAudio.load();
 
-      navigateTo('view-quiz-partB');
-      loadPartBQuestion(currentPartBQuestionIdx);
-    }
+  navigateTo('view-quiz-partB');
+  loadPartBQuestion(currentPartBQuestionIdx);
+}
 
     function loadPartBQuestion(qIdx) {
       const q = partBPickedQuestions[qIdx];
