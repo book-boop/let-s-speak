@@ -37,7 +37,7 @@
       overflow-x: hidden;
     }
 
-    /* 白色主要容器：背景維持滿版大畫面，內容垂直向中間靠齊 */
+    /* 白色主要容器：背景滿版大畫面，內容垂直向中間靠齊 */
     .app-card {
       background: var(--card-bg);
       width: 96vw;
@@ -50,7 +50,7 @@
       display: flex;
       flex-direction: column;
       align-items: center;
-      justify-content: center; /* 讓整體核心內容垂直靠中 */
+      justify-content: center;
       position: relative;
       overflow-y: auto;
       -webkit-overflow-scrolling: touch;
@@ -59,11 +59,11 @@
     .header-box {
       text-align: center;
       flex-shrink: 0;
-      margin-bottom: clamp(14px, 2.2vh, 24px);
+      margin-bottom: clamp(12px, 1.8vh, 20px);
     }
 
     .main-title {
-      font-size: clamp(1.8rem, 4vh, 3rem);
+      font-size: clamp(1.8rem, 3.8vh, 2.8rem);
       font-weight: 800;
       color: #1e293b;
       letter-spacing: 0.5px;
@@ -75,7 +75,7 @@
     .bracket {
       color: #94a3b8;
       font-weight: 300;
-      font-size: clamp(2rem, 4.2vh, 3.4rem);
+      font-size: clamp(2rem, 4vh, 3.2rem);
     }
 
     .arch-curve {
@@ -91,7 +91,7 @@
       display: none;
       flex-direction: column;
       align-items: center;
-      justify-content: center; /* 區塊內容垂直向中靠攏 */
+      justify-content: center;
       animation: fadeIn 0.25s ease-in-out;
     }
 
@@ -104,7 +104,7 @@
       to { opacity: 1; transform: translateY(0); }
     }
 
-    /* 1. 扉頁（首頁）：標題、書籍、按鈕緊湊向中間靠齊 */
+    /* 1. 扉頁（首頁） */
     #view-cover {
       gap: clamp(18px, 3vh, 32px);
     }
@@ -168,7 +168,7 @@
       color: #0f172a;
     }
 
-    /* 2. 選單頁：標題、九宮格、返回按鈕緊湊向中間靠齊 */
+    /* 2. 選單頁 */
     #view-topics {
       gap: clamp(16px, 2.5vh, 26px);
     }
@@ -238,13 +238,47 @@
 
     .btn-back:hover { color: #0f172a; }
 
+    /* ★ 兩大題切換導覽標籤（圖二紅圈處樣式） ★ */
+    .part-switch-bar {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      width: 100%;
+      margin-bottom: 12px;
+    }
+
+    .part-tab-btn {
+      background: #ffffff;
+      color: #64748b;
+      border: 1.8px solid #cbd5e1;
+      padding: 6px 20px;
+      border-radius: 30px;
+      font-size: clamp(0.88rem, 1.5vh, 1.02rem);
+      font-weight: 800;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.03);
+    }
+
+    .part-tab-btn:hover {
+      border-color: #94a3b8;
+      color: #1e293b;
+    }
+
+    .part-tab-btn.active {
+      background: #2563eb;
+      color: #ffffff;
+      border-color: #2563eb;
+      box-shadow: 0 4px 12px rgba(37, 99, 235, 0.28);
+    }
+
     /* 答題進度條組件 */
     .progress-track-wrapper {
       width: 100%;
       background: #e2e8f0;
-      height: 9px;
+      height: 8px;
       border-radius: 10px;
-      margin-bottom: clamp(10px, 1.6vh, 16px);
+      margin-bottom: clamp(10px, 1.5vh, 16px);
       overflow: hidden;
       position: relative;
     }
@@ -258,7 +292,7 @@
     }
 
     .progress-bar-fill.partB-bar {
-      background: linear-gradient(90deg, #ec4899, #be185d);
+      background: linear-gradient(90deg, #3b82f6, #2563eb);
     }
 
     /* 3. 第一大題：單字排序 */
@@ -275,15 +309,15 @@
       display: flex;
       justify-content: space-between;
       align-items: center;
-      margin-bottom: 6px;
+      margin-bottom: 4px;
     }
 
     .quiz-badge {
-      padding: 5px 18px;
+      padding: 5px 16px;
       background: #eff6ff;
       color: #1d4ed8;
       border-radius: 20px;
-      font-size: clamp(0.95rem, 1.7vh, 1.1rem);
+      font-size: clamp(0.92rem, 1.6vh, 1.05rem);
       font-weight: 700;
     }
 
@@ -295,7 +329,7 @@
       padding: 6px 20px;
       border-radius: 30px;
       border: 1px solid #e2e8f0;
-      margin-bottom: clamp(10px, 1.6vh, 16px);
+      margin-bottom: clamp(8px, 1.4vh, 14px);
     }
 
     .btn-audio {
@@ -324,7 +358,7 @@
       grid-template-columns: repeat(3, 1fr);
       gap: clamp(10px, 1.8vw, 16px);
       width: 100%;
-      margin-bottom: clamp(10px, 1.8vh, 18px);
+      margin-bottom: clamp(10px, 1.6vh, 16px);
     }
 
     .order-card {
@@ -476,7 +510,7 @@
       align-items: center;
       gap: 8px;
       box-shadow: 0 5px 16px rgba(37, 99, 235, 0.35);
-      margin-bottom: clamp(12px, 1.8vh, 20px);
+      margin-bottom: clamp(12px, 1.8vh, 18px);
       transition: all 0.2s;
     }
 
@@ -565,13 +599,14 @@
     }
 
     @media (max-height: 720px) {
-      .header-box { margin-bottom: 8px; }
+      .header-box { margin-bottom: 6px; }
       .main-title { font-size: 1.5rem; }
       .card-thumb { max-height: 11vh; }
       .card-word { font-size: 0.8rem; }
       .cards-grid { gap: 6px; margin-bottom: 6px; }
       .btn-action { padding: 6px 16px; font-size: 0.85rem; }
       .option-btn { padding: 8px 12px; font-size: 0.88rem; }
+      .part-switch-bar { margin-bottom: 8px; }
     }
 
     @media (max-width: 480px) {
@@ -584,6 +619,7 @@
       .circle-badge { width: 24px; height: 24px; font-size: 0.78rem; }
       .option-btn { font-size: 0.9rem; padding: 10px 12px; }
       .topics-columns-container { gap: 6px; }
+      .part-tab-btn { padding: 5px 14px; font-size: 0.85rem; }
     }
   </style>
 </head>
@@ -601,7 +637,7 @@
       <div class="arch-curve"></div>
     </header>
 
-    <!-- 1. 扉頁（首頁）：上下向中靠齊，緊湊大方 -->
+    <!-- 1. 扉頁（首頁） -->
     <section id="view-cover" class="view-section active">
       <div class="books-row">
         <div class="book-item" title="Book 1 (U1-U15)">
@@ -617,7 +653,7 @@
       <button id="start-btn" class="btn-capsule" onclick="onStartClicked()">START</button>
     </section>
 
-    <!-- 2. 選單頁：上下向中靠齊，消除多餘空白 -->
+    <!-- 2. 選單頁 -->
     <section id="view-topics" class="view-section">
       <div class="topics-columns-container">
         <!-- Book 1 -->
@@ -648,6 +684,13 @@
     <!-- 3. 第一大題：單字聽力排序 -->
     <section id="view-quiz-partA" class="view-section">
       <div class="quiz-view-wrapper">
+        
+        <!-- 大題導覽標籤（Part A / Part B） -->
+        <div class="part-switch-bar">
+          <button class="part-tab-btn active" onclick="switchToPart('A')">Part A</button>
+          <button class="part-tab-btn" onclick="switchToPart('B')">Part B</button>
+        </div>
+
         <div class="quiz-nav-row">
           <span id="partA-section-badge" class="quiz-badge">第一大題 • 單字排序</span>
           <span id="partA-progress-badge" style="font-size: 0.95rem; color: #475569; font-weight: 700;">回合 1 / 3</span>
@@ -682,8 +725,15 @@
     <!-- 4. 第二大題：句子回應聽力選擇 -->
     <section id="view-quiz-partB" class="view-section">
       <div class="part-b-box">
+        
+        <!-- 大題導覽標籤（Part A / Part B） -->
+        <div class="part-switch-bar">
+          <button class="part-tab-btn" onclick="switchToPart('A')">Part A</button>
+          <button class="part-tab-btn active" onclick="switchToPart('B')">Part B</button>
+        </div>
+
         <div class="quiz-nav-row">
-          <span id="partB-section-badge" class="quiz-badge" style="background: #fdf2f8; color: #be185d;">第二大題 • 聽力問答</span>
+          <span id="partB-section-badge" class="quiz-badge" style="background: #eff6ff; color: #1d4ed8;">第二大題 • 聽力問答</span>
           <span id="partB-progress-badge" style="font-size: 0.95rem; color: #475569; font-weight: 700;">第 1 / 5 題</span>
         </div>
 
@@ -792,6 +842,20 @@
       }
       if ('speechSynthesis' in window) {
         window.speechSynthesis.cancel();
+      }
+    }
+
+    // 自由切換大題導覽標籤（Part A / Part B）
+    function switchToPart(part) {
+      stopCurrentAudio();
+      if (part === 'A') {
+        navigateTo('view-quiz-partA');
+      } else if (part === 'B') {
+        if (!partBPickedQuestions || partBPickedQuestions.length === 0) {
+          startPartB();
+        } else {
+          navigateTo('view-quiz-partB');
+        }
       }
     }
 
